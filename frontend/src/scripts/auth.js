@@ -778,6 +778,7 @@ function logout() {
         
         // 清除本地存储
         localStorage.removeItem('user');
+        localStorage.removeItem('accessToken');
         
         // 更新UI
         updateAuthUI();
