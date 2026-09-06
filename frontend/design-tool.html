@@ -60,7 +60,7 @@
     <!-- 主内容区 -->
     <main>
         <!-- 设计工具头部 -->
-        <section class="design-header">
+        <section class="design-header" data-parallax-section>
             <div class="container">
                 <h1>空间美学工具</h1>
                 <p>拖拽式布局，实时预览，打造您的梦想空间</p>
@@ -226,7 +226,7 @@
                                 <label>尺寸</label>
                                 <div class="dimension-inputs">
                                     <input type="number" id="widthInput" placeholder="宽度" min="10" max="1000">
-                                    <span>×</span>
+                                    <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"/></svg>
                                     <input type="number" id="heightInput" placeholder="高度" min="10" max="1000">
                                     <span>cm</span>
                                 </div>
@@ -298,7 +298,11 @@
 
     <!-- 页脚 -->
     <footer class="footer">
-        <!-- 与首页相同 -->
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2023 栖序空间生活美学. 保留所有权利. | <a href="#">隐私政策</a> | <a href="#">使用条款</a></p>
+            </div>
+        </div>
     </footer>
 
     <script src="./src/scripts/main.js"></script>

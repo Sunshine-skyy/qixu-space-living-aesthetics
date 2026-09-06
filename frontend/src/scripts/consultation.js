@@ -249,6 +249,7 @@ function filterDesigners() {
 
 // 开始咨询
 function startConsultation(designerId) {
+    if (typeof window.requireAuthentication === 'function' && !window.requireAuthentication()) return;
     const designer = consultationState.designers.find(d => d.id === designerId);
     if (!designer) return;
     
@@ -287,7 +288,7 @@ function viewDesignerProfile(designerId) {
     const modalHTML = `
         <div class="designer-modal">
             <div class="modal-content">
-                <button class="close-modal" onclick="closeDesignerModal()">×</button>
+                <button class="close-modal" onclick="closeDesignerModal()" aria-label="关闭"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"/></svg></button>
                 <div class="modal-body">
                     <div class="designer-header" style="text-align: center; padding: 0;">
                         <div class="designer-avatar" style="width: 120px; height: 120px; font-size: 48px;">${designer.name.charAt(0)}</div>
@@ -368,6 +369,7 @@ function closeDesignerModal() {
 
 // 保存设计师
 function saveDesigner(designerId) {
+    if (typeof window.requireAuthentication === 'function' && !window.requireAuthentication()) return;
     let savedDesigners = JSON.parse(localStorage.getItem('savedDesigners') || '[]');
     
     if (!savedDesigners.includes(designerId)) {
@@ -682,6 +684,7 @@ function updateBookingFee() {
 
 // 提交预约
 function submitBooking(event) {
+    if (typeof window.requireAuthentication === 'function' && !window.requireAuthentication()) return;
     event.preventDefault();
     
     const consultantName = document.getElementById('consultantName').value;

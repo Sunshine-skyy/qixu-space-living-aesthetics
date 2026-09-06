@@ -283,6 +283,7 @@ function searchByTag(tag) {
 
 // 切换点赞
 function toggleLike(postId) {
+    if (typeof window.requireAuthentication === 'function' && !window.requireAuthentication()) return;
     const post = communityState.posts.find(p => p.id === postId);
     if (!post) return;
     
@@ -300,6 +301,7 @@ function toggleLike(postId) {
 
 // 切换收藏
 function toggleSave(postId) {
+    if (typeof window.requireAuthentication === 'function' && !window.requireAuthentication()) return;
     const post = communityState.posts.find(p => p.id === postId);
     if (!post) return;
     
@@ -381,6 +383,7 @@ function loadComments(postId) {
 
 // 提交评论
 function submitComment(postId) {
+    if (typeof window.requireAuthentication === 'function' && !window.requireAuthentication()) return;
     const commentInput = document.querySelector(`#comments-${postId} .comment-input`);
     const content = commentInput.value.trim();
     
@@ -449,6 +452,7 @@ function sharePost(postId) {
 
 // 打开发布模态框
 function openPostModal() {
+    if (typeof window.requireAuthentication === 'function' && !window.requireAuthentication()) return;
     document.getElementById('createPostModal').classList.add('active');
 }
 
@@ -478,7 +482,7 @@ function handleImageUpload(event) {
             imgElement.className = 'screenshot-item';
             imgElement.innerHTML = `
                 <img src="${e.target.result}" alt="预览">
-                <button class="remove-screenshot" onclick="this.parentElement.remove()">×</button>
+                <button class="remove-screenshot" onclick="this.parentElement.remove()" aria-label="移除"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"/></svg></button>
             `;
             preview.appendChild(imgElement);
         };
@@ -488,6 +492,7 @@ function handleImageUpload(event) {
 
 // 提交帖子
 function submitPost(event) {
+    if (typeof window.requireAuthentication === 'function' && !window.requireAuthentication()) return;
     event.preventDefault();
     
     const title = document.getElementById('postTitle').value.trim();
@@ -550,8 +555,8 @@ function submitPost(event) {
 
 // 更新社区统计
 function updateCommunityStats() {
-    document.getElementById('totalPosts').textContent = communityState.posts.length;
-    // 其他统计可以在这里更新
+    const totalPosts = document.getElementById('totalPosts');
+    if (totalPosts) totalPosts.textContent = communityState.posts.length;
 }
 
 // 加载活跃用户

@@ -45,7 +45,7 @@ function initializeRecommendations() {
 
 // 设置个性测试
 function setupQuiz() {
-    const totalSteps = 5;
+    const totalSteps = 4;
     
     // 设置选项点击
     document.querySelectorAll('.quiz-option').forEach(option => {
@@ -81,7 +81,7 @@ function setupQuiz() {
 
 // 下一个测试步骤
 function nextQuizStep() {
-    if (recommendationsState.currentQuizStep < 5) {
+        if (recommendationsState.currentQuizStep < 4) {
         // 保存当前答案
         const currentStep = recommendationsState.currentQuizStep;
         const selectedOption = document.querySelector(`#step${currentStep} .quiz-option.selected`);
@@ -93,17 +93,17 @@ function nextQuizStep() {
         
         // 隐藏当前步骤
         document.getElementById(`step${currentStep}`).classList.remove('active');
-        document.getElementById(`step${currentStep}-indicator`).classList.remove('active');
+        document.getElementById(`step${currentStep}-indicator`)?.classList.remove('active');
         
         // 显示下一步
         recommendationsState.currentQuizStep++;
         document.getElementById(`step${recommendationsState.currentQuizStep}`).classList.add('active');
-        document.getElementById(`step${recommendationsState.currentQuizStep}-indicator`).classList.add('active');
+        document.getElementById(`step${recommendationsState.currentQuizStep}-indicator`)?.classList.add('active');
         
         // 更新按钮状态
         document.getElementById('prevBtn').style.display = 'inline-block';
         
-        if (recommendationsState.currentQuizStep === 5) {
+        if (recommendationsState.currentQuizStep === 4) {
             document.getElementById('nextBtn').style.display = 'none';
             document.getElementById('submitBtn').style.display = 'inline-block';
         }
@@ -115,12 +115,12 @@ function prevQuizStep() {
     if (recommendationsState.currentQuizStep > 1) {
         // 隐藏当前步骤
         document.getElementById(`step${recommendationsState.currentQuizStep}`).classList.remove('active');
-        document.getElementById(`step${recommendationsState.currentQuizStep}-indicator`).classList.remove('active');
+        document.getElementById(`step${recommendationsState.currentQuizStep}-indicator`)?.classList.remove('active');
         
         // 显示上一步
         recommendationsState.currentQuizStep--;
         document.getElementById(`step${recommendationsState.currentQuizStep}`).classList.add('active');
-        document.getElementById(`step${recommendationsState.currentQuizStep}-indicator`).classList.add('active');
+        document.getElementById(`step${recommendationsState.currentQuizStep}-indicator`)?.classList.add('active');
         
         // 更新按钮状态
         document.getElementById('nextBtn').style.display = 'inline-block';
@@ -135,7 +135,7 @@ function prevQuizStep() {
 // 提交测试
 function submitQuiz() {
     // 检查是否完成所有问题
-    const totalSteps = 5;
+    const totalSteps = 4;
     for (let i = 1; i <= totalSteps; i++) {
         if (!recommendationsState.quizAnswers[`step${i}`]) {
             showNotification('请完成所有问题', 'warning');
@@ -450,7 +450,7 @@ function viewRecommendation(recommendationId) {
     const modalHTML = `
         <div class="recommendation-modal">
             <div class="modal-content">
-                <button class="close-modal" onclick="closeRecommendationModal()">×</button>
+                <button class="close-modal" onclick="closeRecommendationModal()" aria-label="关闭"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"/></svg></button>
                 <div class="modal-body">
                     <h2>${recommendation.title}</h2>
                     <div class="modal-meta">
@@ -503,6 +503,7 @@ function closeRecommendationModal() {
 
 // 应用推荐方案
 function applyRecommendation(recommendationId) {
+    if (typeof window.requireAuthentication === 'function' && !window.requireAuthentication()) return;
     const recommendation = recommendationsState.recommendations.find(r => r.id === recommendationId);
     if (!recommendation) return;
     
@@ -515,6 +516,7 @@ function applyRecommendation(recommendationId) {
 
 // 保存推荐方案
 function saveRecommendation(recommendationId) {
+    if (typeof window.requireAuthentication === 'function' && !window.requireAuthentication()) return;
     let savedRecommendations = JSON.parse(localStorage.getItem('savedRecommendations') || '[]');
     
     if (!savedRecommendations.includes(recommendationId)) {
@@ -528,6 +530,7 @@ function saveRecommendation(recommendationId) {
 
 // 咨询设计师
 function consultDesigner(recommendationId) {
+    if (typeof window.requireAuthentication === 'function' && !window.requireAuthentication()) return;
     window.location.href = 'consultation.html';
 }
 
@@ -544,6 +547,7 @@ function setupDesigners() {
 
 // 预约咨询
 function bookConsultation(designerName) {
+    if (typeof window.requireAuthentication === 'function' && !window.requireAuthentication()) return;
     openBookingModal(designerName);
 }
 
@@ -628,6 +632,7 @@ function generateAIResponse(prompt) {
 
 // 保存AI推荐
 function saveAIRecommendation() {
+    if (typeof window.requireAuthentication === 'function' && !window.requireAuthentication()) return;
     if (!recommendationsState.aiRecommendation) {
         showNotification('没有可保存的推荐方案', 'warning');
         return;

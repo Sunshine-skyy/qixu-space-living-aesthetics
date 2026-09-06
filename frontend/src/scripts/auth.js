@@ -53,6 +53,8 @@ function checkLoginStatus() {
 
 // 更新认证UI
 function updateAuthUI() {
+    updateAuthenticationNavigation();
+
     // 更新导航栏的用户显示
     const userElements = document.querySelectorAll('.user-status, .nav-dropdown a');
     
@@ -70,6 +72,56 @@ function updateAuthUI() {
     
     // 更新账户页面的用户信息
     updateAccountPage();
+}
+
+// 登录状态变化后同步桌面端和移动端导航显示。
+function updateAuthenticationNavigation() {
+    const loggedIn = Boolean(authState.isAuthenticated && authState.user);
+    const desktopAuthActions = document.querySelector('.nav-auth-actions');
+
+    if (loggedIn && desktopAuthActions) {
+        const dropdown = document.createElement('div');
+        dropdown.className = 'nav-dropdown';
+        dropdown.innerHTML = `
+            <a href="#" aria-haspopup="true" aria-expanded="false"><i class="fas fa-user"></i> 个人账户 <i class="fas fa-chevron-down"></i></a>
+            <div class="dropdown-content">
+                <a href="account.html"><i class="fas fa-user-circle"></i> 我的账户</a>
+                <a href="account.html#history"><i class="fas fa-history"></i> 浏览历史</a>
+                <a href="account.html#favorites"><i class="fas fa-heart"></i> 我的收藏</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> 退出登录</a>
+            </div>
+        `;
+        desktopAuthActions.replaceWith(dropdown);
+        if (typeof setupDropdownMenus === 'function') setupDropdownMenus();
+        setupLogout();
+    }
+
+    if (!loggedIn && !desktopAuthActions) {
+        const dropdown = document.querySelector('.nav-dropdown');
+        if (dropdown) {
+            const authActions = document.createElement('div');
+            authActions.className = 'nav-auth-actions';
+            authActions.innerHTML = `
+                <a class="nav-auth-link" href="account.html?auth=login"><i class="fas fa-user"></i> 登录/注册</a>
+            `;
+            dropdown.replaceWith(authActions);
+        }
+    }
+
+    const mobileNav = document.querySelector('.mobile-nav');
+    if (!mobileNav) return;
+    mobileNav.querySelector('.mobile-auth-actions')?.remove();
+    const mobileAccount = Array.from(mobileNav.querySelectorAll('a')).find(link => link.getAttribute('href') === 'account.html');
+    if (!loggedIn && mobileAccount) mobileAccount.remove();
+    if (!loggedIn) {
+        const mobileActions = document.createElement('div');
+        mobileActions.className = 'mobile-auth-actions';
+        mobileActions.innerHTML = `
+            <a href="account.html?auth=login"><i class="fas fa-user"></i> 登录/注册</a>
+        `;
+        mobileNav.appendChild(mobileActions);
+    }
 }
 
 // 更新账户页面
@@ -136,19 +188,27 @@ function setupAuthModals() {
         });
     });
     
-    // 关闭模态框
-    document.querySelectorAll('.auth-modal .close-modal, .auth-modal .modal-overlay').forEach(element => {
-        element.addEventListener('click', closeAuthModal);
-    });
-    
-    // 切换表单类型
-    document.querySelectorAll('.auth-switch').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetForm = this.getAttribute('data-target');
-            switchAuthForm(targetForm);
+    // 模态框按需动态创建，使用事件委托保证右上角关闭按钮始终有效。
+    if (document.documentElement.dataset.authModalEventsReady !== '1') {
+        document.documentElement.dataset.authModalEventsReady = '1';
+        document.addEventListener('click', function(event) {
+            if (event.target.closest('.auth-modal .close-modal, .auth-modal .modal-overlay')) {
+                event.preventDefault();
+                closeAuthModal();
+            }
         });
-    });
+    }
+    
+    // 认证弹窗按需动态创建，使用事件委托保证登录/注册/重置链接始终有效。
+    if (document.documentElement.dataset.authSwitchEventsReady !== '1') {
+        document.documentElement.dataset.authSwitchEventsReady = '1';
+        document.addEventListener('click', function(event) {
+            const switchLink = event.target.closest('.auth-switch [data-target], .forgot-password[data-target]');
+            if (!switchLink) return;
+            event.preventDefault();
+            switchAuthForm(switchLink.getAttribute('data-target'));
+        });
+    }
 }
 
 // 显示认证模态框
@@ -176,7 +236,7 @@ function createAuthModal() {
         <div class="auth-modal">
             <div class="modal-overlay"></div>
             <div class="modal-content">
-                <button class="close-modal">×</button>
+                <button class="close-modal" aria-label="关闭"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"/></svg></button>
                 
                 <div class="auth-forms">
                     <!-- 登录表单 -->

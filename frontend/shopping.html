@@ -411,7 +411,7 @@
                 </div>
                 <a href="feedback.html" class="btn-feedback"><i class="fas fa-comment-dots"></i> 反馈</a>
                 <button class="btn-primary" onclick="toggleCart()">
-                    <i class="fas fa-shopping-cart"></i> 购物车 <span class="cart-count">3</span>
+                    <i class="fas fa-shopping-cart"></i> 购物车 <span class="cart-count">2</span>
                 </button>
             </div>
             <div class="mobile-menu-btn">
@@ -430,7 +430,7 @@
     <div class="cart-sidebar">
         <div class="cart-header">
             <h3><i class="fas fa-shopping-cart"></i> 购物车</h3>
-            <button class="close-cart" onclick="toggleCart()">×</button>
+            <button class="close-cart" onclick="toggleCart()" aria-label="关闭"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"/></svg></button>
         </div>
         <div class="cart-items">
             <!-- 购物车项目动态加载 -->
@@ -438,7 +438,7 @@
         <div class="cart-total">
             <div class="total-row">
                 <span>商品总计:</span>
-                <span class="subtotal">￥8,497</span>
+                <span class="subtotal">￥5,598</span>
             </div>
             <div class="total-row">
                 <span>运费:</span>
@@ -446,7 +446,7 @@
             </div>
             <div class="total-row">
                 <strong>总计:</strong>
-                <strong class="total-price">￥8,497</strong>
+                <strong class="total-price">￥5,598</strong>
             </div>
             <button class="btn-primary" style="width: 100%; margin-top: 20px;">前往结算</button>
         </div>
@@ -455,7 +455,7 @@
     <!-- 主内容区 -->
     <main>
         <!-- 购物页头部 -->
-        <section class="shopping-header">
+        <section class="shopping-header" data-parallax-section>
             <div class="container">
                 <h1>家居购物商城</h1>
                 <p>探索精选家居商品，打造理想生活空间</p>
@@ -548,7 +548,11 @@
 
     <!-- 页脚 -->
     <footer class="footer">
-        <!-- 与首页相同 -->
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2023 栖序空间生活美学. 保留所有权利. | <a href="#">隐私政策</a> | <a href="#">使用条款</a></p>
+            </div>
+        </div>
     </footer>
 
     <script src="./src/scripts/main.js"></script>
