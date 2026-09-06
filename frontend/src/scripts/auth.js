@@ -1,11 +1,50 @@
 ﻿// 认证功能
-document.addEventListener('DOMContentLoaded', function() {
+const API_BASE_URL = 'http://localhost:3000/api/v1';
+
+document.addEventListener('DOMContentLoaded', async function() {
     initializeAuth();
+    await loadCurrentUser();
     checkLoginStatus();
     setupAuthForms();
     setupAuthModals();
     setupLogout();
 });
+
+async function apiRequest(path, options = {}) {
+    const token = localStorage.getItem('accessToken');
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...(options.headers || {})
+        }
+    });
+    const result = await response.json();
+    if (!response.ok) {
+        const error = new Error(result.error?.message || '请求失败');
+        error.code = result.error?.code;
+        throw error;
+    }
+    return result;
+}
+
+async function loadCurrentUser() {
+    if (!localStorage.getItem('accessToken')) return;
+    try {
+        const result = await apiRequest('/auth/me');
+        authState.user = result.data;
+        authState.isAuthenticated = true;
+        localStorage.setItem('user', JSON.stringify(result.data));
+        updateAuthUI();
+    } catch {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('user');
+        authState.user = null;
+        authState.isAuthenticated = false;
+        updateAuthUI();
+    }
+}
 
 // 认证状态
 let authState = {
@@ -461,11 +500,11 @@ async function handleLogin(event) {
     submitBtn.disabled = true;
     
     try {
-        // 模拟API请求延迟
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // 验证用户
-        const user = await authenticateUser(email, password);
+        const result = await apiRequest('/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ email, password })
+        });
+        const user = result.data.user;
         
         if (user) {
             // 登录成功
@@ -474,6 +513,7 @@ async function handleLogin(event) {
             
             // 保存用户信息
             localStorage.setItem('user', JSON.stringify(user));
+            localStorage.setItem('accessToken', result.data.accessToken);
             
             // 更新UI
             updateAuthUI();
@@ -495,8 +535,6 @@ async function handleLogin(event) {
                     window.location.hash = '#profile';
                 }
             }, 500);
-        } else {
-            throw new Error('邮箱或密码错误');
         }
     } catch (error) {
         showNotification(error.message || '登录失败，请重试', 'error');
@@ -550,16 +588,11 @@ async function handleRegister(event) {
     submitBtn.disabled = true;
     
     try {
-        // 模拟API请求延迟
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // 检查用户是否已存在
-        if (await userExists(email)) {
-            throw new Error('该邮箱已被注册');
-        }
-        
-        // 创建用户
-        const user = await createUser(username, email, password);
+        const result = await apiRequest('/auth/register', {
+            method: 'POST',
+            body: JSON.stringify({ username, email, password })
+        });
+        const user = result.data.user;
         
         // 注册成功
         authState.user = user;
@@ -567,22 +600,17 @@ async function handleRegister(event) {
         
         // 保存用户信息
         localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('accessToken', result.data.accessToken);
         
         // 更新UI
         updateAuthUI();
-        
-        // 切换到登录表单
-        switchAuthForm('login');
         
         // 清空表单
         event.target.reset();
         
         // 显示成功消息
-        showNotification('注册成功！请使用新账户登录。', 'success');
-        
-        // 自动填充登录表单
-        document.getElementById('loginEmail').value = email;
-        document.getElementById('loginPassword').value = password;
+        closeAuthModal();
+        showNotification('注册成功！', 'success');
         
     } catch (error) {
         showNotification(error.message || '注册失败，请重试', 'error');
@@ -750,6 +778,7 @@ function logout() {
         
         // 清除本地存储
         localStorage.removeItem('user');
+        localStorage.removeItem('accessToken');
         
         // 更新UI
         updateAuthUI();
