@@ -17,3 +17,24 @@ model User {
 
   @@map("users")
 }
+
+model Product {
+  id            Int      @id @default(autoincrement())
+  name          String
+  category      String
+  style         String
+  price         Int
+  originalPrice Int
+  rating        Decimal  @db.Decimal(2, 1)
+  sales         Int      @default(0)
+  image         String   @db.Text
+  tags          Json
+  description   String   @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([category])
+  @@index([style])
+  @@index([price])
+  @@map("products")
+}
