@@ -40,7 +40,7 @@ const FURNITURE = [
 
 const designState = {
     currentTool: 'select', selectedElement: null, elements: [], undoStack: [], redoStack: [],
-    currentRoom: 'living-room', currentTheme: 'mist', furnitureItems: FURNITURE, sceneReady: false
+    currentRoom: 'living-room', currentTheme: 'mist', furnitureItems: FURNITURE, sceneReady: false, currentDesignId: null, currentDesignName: ''
 };
 
 let initialized = false;
@@ -74,7 +74,7 @@ function setupDesignTool() {
     initialized = true;
     injectStyles(); setupScene(); setupFurnitureLibrary(); setupToolbar(); setupPropertiesPanel();
     setupRoomTemplates(); setupCategoryTabs(); setupColorThemes(); setupKeyboardShortcuts();
-    loadRequestedTemplate(); renderShoppingList(); updateElementCount(); startRenderLoop();
+    loadRequestedDesignOrTemplate(); renderShoppingList(); updateElementCount(); startRenderLoop();
 }
 
 function injectStyles() {
@@ -295,7 +295,49 @@ function updateElementCount() { const node = document.getElementById('elementCou
 function renderShoppingList() { const container = document.getElementById('shoppingList'); if (!container) return; const grouped = new Map(); designState.elements.filter(item => item.price > 0).forEach(item => { const existing = grouped.get(item.furnitureId) || { ...item, quantity: 0 }; existing.quantity += 1; grouped.set(item.furnitureId, existing); }); if (!grouped.size) { container.innerHTML = '<div class="empty-list"><i class="fas fa-shopping-basket"></i><p>暂无商品</p></div>'; return; } let total = 0; const html = [...grouped.values()].map(item => { const subtotal = item.price * item.quantity; total += subtotal; return `<div class="shopping-item"><div class="shopping-info"><h4>${item.name}</h4><div class="price">￥${item.price.toLocaleString()} × ${item.quantity}</div></div><div class="shopping-total">￥${subtotal.toLocaleString()}</div><button class="remove-item" data-furniture-id="${item.furnitureId}" title="移除"><i class="fas fa-times"></i></button></div>`; }).join(''); container.innerHTML = `${html}<div class="shopping-total" style="margin-top:15px;padding-top:15px;border-top:1px solid rgba(143,160,168,.18);"><strong>总计：￥${total.toLocaleString()}</strong></div><button class="btn-primary" style="width:100%;margin-top:15px;" id="shoppingLink"><i class="fas fa-shopping-cart"></i> 前往购物</button>`; container.querySelectorAll('[data-furniture-id]').forEach(node => node.addEventListener('click', () => removeFromShoppingList(Number(node.dataset.furnitureId)))); document.getElementById('shoppingLink')?.addEventListener('click', goToShopping); }
 function removeFromShoppingList(furnitureId) { const target = designState.elements.find(item => item.furnitureId === furnitureId); if (!target) return; saveState(); designState.elements = designState.elements.filter(item => item.id !== target.id); designState.selectedElement = null; syncFurnitureMeshes(); renderShoppingList(); updateElementCount(); clearPropertiesPanel(); }
 function goToShopping() { window.location.href = 'shopping.html'; }
-function saveDesign() { localStorage.setItem('userDesigns', JSON.stringify([...JSON.parse(localStorage.getItem('userDesigns') || '[]'), { room: { ...roomState }, template: designState.currentRoom, elements: designState.elements, timestamp: new Date().toISOString() }])); alert('设计已保存'); }
+async function saveDesign() {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) return alert('请先登录后保存设计');
+    const name = window.prompt('请输入设计名称', designState.currentDesignName || `${designState.currentRoom} 设计`)?.trim();
+    if (!name) return;
+    const endpoint = designState.currentDesignId ? `http://localhost:3000/api/v1/designs/${encodeURIComponent(designState.currentDesignId)}` : 'http://localhost:3000/api/v1/designs';
+    const response = await fetch(endpoint, { method: designState.currentDesignId ? 'PATCH' : 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ name, data: { room: { ...roomState }, template: designState.currentRoom, elements: designState.elements, timestamp: new Date().toISOString() } }) });
+    const result = await response.json();
+    if (!response.ok || !result.success) return alert(result.error?.message || '设计保存失败');
+    designState.currentDesignId = result.data.id;
+    designState.currentDesignName = result.data.name;
+    alert('设计已保存');
+}
+
+async function loadRequestedDesignOrTemplate() {
+    const designId = new URLSearchParams(window.location.search).get('design');
+    if (!designId) { loadRequestedTemplate(); return; }
+    const token = localStorage.getItem('accessToken');
+    if (!token) { alert('请先登录后查看设计'); loadRequestedTemplate(); return; }
+    try {
+        const response = await fetch(`http://localhost:3000/api/v1/designs/${encodeURIComponent(designId)}`, { headers: { Authorization: `Bearer ${token}` } });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.error?.message || '设计加载失败');
+        const design = result.data;
+        const data = design.data || {};
+        designState.currentDesignId = design.id;
+        designState.currentDesignName = design.name;
+        designState.currentRoom = data.template || 'living-room';
+        Object.assign(roomState, data.room || DEFAULT_ROOM);
+        designState.elements = Array.isArray(data.elements) ? data.elements : [];
+        designState.undoStack = [];
+        designState.redoStack = [];
+        designState.selectedElement = null;
+        document.querySelectorAll('.room-template').forEach(item => item.classList.toggle('active', item.dataset.template === designState.currentRoom));
+        syncRoomInputs();
+        rebuildRoom();
+        renderShoppingList();
+        updateElementCount();
+    } catch (error) {
+        alert(error.message || '设计加载失败');
+        loadRequestedTemplate();
+    }
+}
 function saveState() { designState.undoStack.push(JSON.parse(JSON.stringify(designState.elements))); designState.redoStack = []; if (designState.undoStack.length > 30) designState.undoStack.shift(); }
 function undo() { if (!designState.undoStack.length) return; designState.redoStack.push(JSON.parse(JSON.stringify(designState.elements))); designState.elements = designState.undoStack.pop(); designState.selectedElement = null; syncFurnitureMeshes(); renderShoppingList(); updateElementCount(); clearPropertiesPanel(); }
 function redo() { if (!designState.redoStack.length) return; designState.undoStack.push(JSON.parse(JSON.stringify(designState.elements))); designState.elements = designState.redoStack.pop(); designState.selectedElement = null; syncFurnitureMeshes(); renderShoppingList(); updateElementCount(); clearPropertiesPanel(); }
