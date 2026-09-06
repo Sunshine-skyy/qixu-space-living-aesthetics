@@ -42,6 +42,36 @@ body {
     letter-spacing: 0.01em;
 }
 
+.home-page {
+    position: relative;
+    isolation: isolate;
+    background: #dfe8e3;
+}
+
+.home-page::before {
+    content: '';
+    position: fixed;
+    /* Overscan leaves room for the scroll translation without exposing the page color. */
+    inset: -50vh -8vw;
+    z-index: -2;
+    pointer-events: none;
+    background-image: url('https://images.unsplash.com/photo-1616594039964-ae9021a400a0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2200&q=88');
+    background-position: center;
+    background-size: cover;
+    transform: translate3d(0, var(--page-parallax-y, 0px), 0) scale(1.12);
+    will-change: transform;
+}
+
+.home-page::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    /* Keep the shared photo visible; individual sections provide their own readable surfaces. */
+    background: rgba(242, 244, 242, 0.3);
+}
+
 .container {
     max-width: 1280px;
     margin: 0 auto;
@@ -168,7 +198,7 @@ body {
 }
 
 .dropdown-content {
-    display: none;
+    display: none !important;
     position: absolute;
     top: 100%;
     right: 0;
@@ -180,8 +210,15 @@ body {
     padding: 10px 0;
 }
 
-.nav-dropdown:hover .dropdown-content {
-    display: block;
+.nav-dropdown:hover .dropdown-content,
+.nav-dropdown.is-hovered .dropdown-content,
+.nav-dropdown.is-open .dropdown-content {
+    display: block !important;
+}
+
+/* A second click closes the menu even while the pointer remains over its trigger. */
+.nav-dropdown.is-hover-suppressed:hover .dropdown-content {
+    display: none !important;
 }
 
 .dropdown-content a {
@@ -858,6 +895,40 @@ textarea:focus-visible {
     border-radius: 50%;
 }
 
+.hero-parallax {
+    isolation: isolate;
+    /* 首屏与整页共用 body 的背景，不再叠加雾状白色卡片层。 */
+    background: transparent;
+}
+
+.hero-parallax [data-parallax-foreground] {
+    transform: translate3d(0, var(--parallax-foreground-y, 0px), 0);
+    opacity: var(--parallax-foreground-opacity, 1);
+    will-change: transform, opacity;
+}
+
+.hero-parallax [data-parallax-image] {
+    transform: translate3d(0, var(--parallax-image-y, 0px), 0);
+    will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-page::before {
+        transform: none;
+        will-change: auto;
+    }
+
+    .hero-parallax [data-parallax-foreground] {
+        transform: none;
+        will-change: auto;
+    }
+
+    .hero-parallax [data-parallax-image] {
+        transform: none;
+        will-change: auto;
+    }
+}
+
 .hero-content {
     position: relative;
     z-index: 1;
@@ -913,13 +984,13 @@ textarea:focus-visible {
 .features,
 .hot-products {
     padding: var(--space-6) 0;
-    background: var(--mist-white);
+    background: rgba(242, 244, 242, 0.72);
 }
 
 .trends,
 .activities {
     padding: var(--space-6) 0;
-    background: var(--paper);
+    background: rgba(251, 252, 250, 0.7);
 }
 
 .features h2,
