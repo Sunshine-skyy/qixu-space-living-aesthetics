@@ -16,6 +16,7 @@ let accountState = {
     currentSection: 'profile',
     editMode: false
 };
+const DESIGN_API_URL = 'http://localhost:3000/api/v1/designs';
 
 // 初始化账户
 function initializeAccount() {
@@ -395,37 +396,17 @@ function createOrderElement(order) {
 }
 
 // 加载设计作品
-function loadDesigns() {
-    // 模拟设计作品数据
-    const designs = [
-        {
-            id: 1,
-            title: '现代简约客厅设计',
-            date: '2023-10-12',
-            views: 128,
-            likes: 42
-        },
-        {
-            id: 2,
-            title: '北欧风格卧室方案',
-            date: '2023-10-08',
-            views: 89,
-            likes: 31
-        },
-        {
-            id: 3,
-            title: '小户型空间优化设计',
-            date: '2023-10-01',
-            views: 156,
-            likes: 67
-        }
-    ];
-    
+async function loadDesigns() {
+    const token = localStorage.getItem('accessToken');
     const container = document.getElementById('designsList');
     if (!container) return;
-    
+    if (!token) { container.innerHTML = '<p style="text-align:center;color:var(--gray-color);">请登录查看设计方案</p>'; return; }
+    const response = await fetch(DESIGN_API_URL, { headers: { Authorization: `Bearer ${token}` } });
+    const result = await response.json();
+    if (!response.ok || !result.success) { container.innerHTML = '<p style="text-align:center;color:var(--gray-color);">设计方案加载失败</p>'; return; }
+    const designs = result.data || [];
     container.innerHTML = '';
-    
+    if (!designs.length) { container.innerHTML = '<p style="text-align:center;color:var(--gray-color);">暂无保存的设计方案</p>'; return; }
     designs.forEach(design => {
         const designElement = createDesignElement(design);
         container.appendChild(designElement);
@@ -442,39 +423,44 @@ function createDesignElement(design) {
             <i class="fas fa-palette"></i>
         </div>
         <div class="design-info">
-            <h3 class="design-title">${design.title}</h3>
+            <h3 class="design-title"></h3>
             <div class="design-meta">
-                <span>${design.date}</span>
-                <span>${design.views} 次浏览</span>
+                <span>${new Date(design.updatedAt).toLocaleDateString()}</span>
+                <span>已保存</span>
             </div>
             <div class="design-actions">
-                <button class="btn-outline" onclick="viewDesign(${design.id})">查看</button>
-                <button class="btn-outline" onclick="editDesign(${design.id})">编辑</button>
-                <button class="btn-outline" onclick="deleteDesign(${design.id})">删除</button>
+                <button type="button" class="btn-outline" data-design-action="view">查看</button>
+                <button type="button" class="btn-outline" data-design-action="edit">编辑</button>
+                <button type="button" class="btn-outline" data-design-action="delete">删除</button>
             </div>
         </div>
     `;
-    
+
+    designDiv.querySelector('.design-title').textContent = design.name;
+    designDiv.querySelector('[data-design-action="view"]').addEventListener('click', () => viewDesign(design.id));
+    designDiv.querySelector('[data-design-action="edit"]').addEventListener('click', () => editDesign(design.id));
+    designDiv.querySelector('[data-design-action="delete"]').addEventListener('click', () => deleteDesign(design.id));
     return designDiv;
 }
 
 // 查看设计
 function viewDesign(designId) {
-    alert(`查看设计 ${designId}`);
-    // 实际开发中可以跳转到设计查看页面
+    window.location.href = `design-tool.html?design=${encodeURIComponent(designId)}`;
 }
 
 // 编辑设计
 function editDesign(designId) {
-    window.location.href = `design-tool.html?design=${designId}`;
+    window.location.href = `design-tool.html?design=${encodeURIComponent(designId)}`;
 }
 
 // 删除设计
-function deleteDesign(designId) {
+async function deleteDesign(designId) {
     if (confirm('确定要删除这个设计吗？')) {
+        const token = localStorage.getItem('accessToken');
+        const response = await fetch(`${DESIGN_API_URL}/${designId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+        if (!response.ok) return showNotification('设计删除失败', 'error');
         showNotification('设计已删除', 'success');
-        // 实际开发中需要从服务器删除
-        loadDesigns(); // 重新加载
+        loadDesigns();
     }
 }
 
