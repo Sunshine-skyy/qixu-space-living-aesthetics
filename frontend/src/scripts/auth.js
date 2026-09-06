@@ -192,20 +192,23 @@ function updateAccountPage() {
 function setupAuthForms() {
     // 登录表单
     const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
+    if (loginForm && loginForm.dataset.authReady !== '1') {
         loginForm.addEventListener('submit', handleLogin);
+        loginForm.dataset.authReady = '1';
     }
     
     // 注册表单
     const registerForm = document.getElementById('registerForm');
-    if (registerForm) {
+    if (registerForm && registerForm.dataset.authReady !== '1') {
         registerForm.addEventListener('submit', handleRegister);
+        registerForm.dataset.authReady = '1';
     }
     
     // 密码重置表单
     const resetForm = document.getElementById('resetForm');
-    if (resetForm) {
+    if (resetForm && resetForm.dataset.authReady !== '1') {
         resetForm.addEventListener('submit', handlePasswordReset);
+        resetForm.dataset.authReady = '1';
     }
 }
 
@@ -256,6 +259,10 @@ function showAuthModal(type = 'login') {
     if (!document.querySelector('.auth-modal')) {
         createAuthModal();
     }
+
+    // The modal is created lazily on pages without an auth query parameter.
+    // Bind its forms after creation so click-opened dialogs submit correctly.
+    setupAuthForms();
     
     // 显示模态框
     const modal = document.querySelector('.auth-modal');
@@ -351,6 +358,14 @@ function createAuthModal() {
     `;
     
     document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    const modal = document.querySelector('.auth-modal');
+    modal.querySelectorAll('[data-target]').forEach(link => {
+        link.addEventListener('click', event => {
+            event.preventDefault();
+            switchAuthForm(link.getAttribute('data-target'));
+        });
+    });
     
     // 添加样式
     if (!document.querySelector('style#auth-modal-styles')) {
