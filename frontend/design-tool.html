@@ -8,6 +8,14 @@
     <link rel="stylesheet" href="./src/styles/design-tool.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "./node_modules/three/build/three.module.js",
+                "three/addons/": "./node_modules/three/examples/jsm/"
+            }
+        }
+    </script>
 </head>
 <body>
     <!-- 导航栏 -->
@@ -155,6 +163,9 @@
                                 <button class="tool-btn" id="gridToggle" title="显示网格">
                                     <i class="fas fa-th"></i>
                                 </button>
+                                <button class="tool-btn" id="clearAllBtn" title="清空全部家具">
+                                    <i class="fas fa-broom"></i>
+                                </button>
                             </div>
                             <div class="toolbar-right">
                                 <button class="tool-btn" id="undoBtn" title="撤销">
@@ -186,6 +197,25 @@
 
                     <!-- 右侧属性面板 -->
                     <div class="properties-panel">
+                        <div class="properties-section room-settings">
+                            <h3><i class="fas fa-expand-arrows-alt"></i> 空间尺寸</h3>
+                            <div class="property-group">
+                                <label for="roomWidthInput">宽度（厘米）</label>
+                                <input type="number" id="roomWidthInput" min="200" max="3000" step="10" value="960">
+                            </div>
+                            <div class="property-group">
+                                <label for="roomDepthInput">深度（厘米）</label>
+                                <input type="number" id="roomDepthInput" min="200" max="3000" step="10" value="420">
+                            </div>
+                            <div class="property-group">
+                                <label for="roomHeightInput">高度（厘米）</label>
+                                <input type="number" id="roomHeightInput" min="200" max="5000" step="10" value="620">
+                            </div>
+                            <div class="room-settings-actions">
+                                <button class="btn-primary" id="applyRoomBtn" type="button">应用尺寸</button>
+                                <button class="btn-outline" id="resetRoomBtn" type="button">恢复默认</button>
+                            </div>
+                        </div>
                         <div class="properties-section">
                             <h3><i class="fas fa-cog"></i> 属性设置</h3>
                             <div class="property-group">
@@ -227,16 +257,6 @@
                             </button>
                         </div>
 
-                        <div class="properties-section">
-                            <h3><i class="fas fa-shopping-cart"></i> 购物清单</h3>
-                            <div class="shopping-list" id="shoppingList">
-                                <!-- 购物清单项目 -->
-                                <div class="empty-list">
-                                    <i class="fas fa-shopping-basket"></i>
-                                    <p>暂无商品</p>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -282,7 +302,7 @@
     </footer>
 
     <script src="./src/scripts/main.js"></script>
-    <script src="./src/scripts/design-tool.js"></script>
+    <script type="module" src="./src/scripts/design-tool.js"></script>
 </body>
 </html>
 
