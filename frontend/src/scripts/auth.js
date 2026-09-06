@@ -1,0 +1,810 @@
+﻿// 认证功能
+document.addEventListener('DOMContentLoaded', function() {
+    initializeAuth();
+    checkLoginStatus();
+    setupAuthForms();
+    setupAuthModals();
+    setupLogout();
+});
+
+// 认证状态
+let authState = {
+    user: null,
+    isAuthenticated: false,
+    authModalOpen: false
+};
+
+// 初始化认证
+function initializeAuth() {
+    // 从本地存储加载用户
+    loadUserFromStorage();
+    
+    // 更新UI状态
+    updateAuthUI();
+    
+    // 检查URL中的认证参数
+    checkAuthParams();
+}
+
+// 从本地存储加载用户
+function loadUserFromStorage() {
+    try {
+        const userData = localStorage.getItem('user');
+        if (userData) {
+            authState.user = JSON.parse(userData);
+            authState.isAuthenticated = true;
+        }
+    } catch (error) {
+        console.error('加载用户数据失败:', error);
+        localStorage.removeItem('user');
+    }
+}
+
+// 检查登录状态
+function checkLoginStatus() {
+    // 如果用户未登录且当前页面需要登录，重定向到登录
+    const protectedPages = ['account.html', 'feedback.html'];
+    const currentPage = window.location.pathname.split('/').pop();
+    
+    if (protectedPages.includes(currentPage) && !authState.isAuthenticated) {
+        showAuthModal('login');
+    }
+}
+
+// 更新认证UI
+function updateAuthUI() {
+    // 更新导航栏的用户显示
+    const userElements = document.querySelectorAll('.user-status, .nav-dropdown a');
+    
+    userElements.forEach(element => {
+        if (authState.isAuthenticated && authState.user) {
+            if (element.classList.contains('user-status')) {
+                element.innerHTML = `<i class="fas fa-user-circle"></i> ${authState.user.username}`;
+            }
+        } else {
+            if (element.classList.contains('user-status')) {
+                element.innerHTML = '<i class="fas fa-user"></i> 登录/注册';
+            }
+        }
+    });
+    
+    // 更新账户页面的用户信息
+    updateAccountPage();
+}
+
+// 更新账户页面
+function updateAccountPage() {
+    if (!authState.isAuthenticated || !authState.user) return;
+    
+    // 更新个人信息
+    const usernameElement = document.getElementById('username');
+    const userEmailElement = document.getElementById('userEmail');
+    
+    if (usernameElement) usernameElement.textContent = authState.user.username;
+    if (userEmailElement) userEmailElement.textContent = authState.user.email;
+    
+    // 更新表单
+    const profileUsername = document.getElementById('profileUsername');
+    const profileEmail = document.getElementById('profileEmail');
+    
+    if (profileUsername) profileUsername.value = authState.user.username;
+    if (profileEmail) profileEmail.value = authState.user.email;
+    
+    // 更新头像
+    const avatarElement = document.getElementById('userAvatar');
+    if (avatarElement && authState.user.avatar) {
+        avatarElement.innerHTML = `<img src="${authState.user.avatar}" alt="头像">`;
+    }
+}
+
+// 设置认证表单
+function setupAuthForms() {
+    // 登录表单
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
+    
+    // 注册表单
+    const registerForm = document.getElementById('registerForm');
+    if (registerForm) {
+        registerForm.addEventListener('submit', handleRegister);
+    }
+    
+    // 密码重置表单
+    const resetForm = document.getElementById('resetForm');
+    if (resetForm) {
+        resetForm.addEventListener('submit', handlePasswordReset);
+    }
+}
+
+// 设置认证模态框
+function setupAuthModals() {
+    // 登录链接
+    document.querySelectorAll('[data-action="login"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            showAuthModal('login');
+        });
+    });
+    
+    // 注册链接
+    document.querySelectorAll('[data-action="register"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            showAuthModal('register');
+        });
+    });
+    
+    // 关闭模态框
+    document.querySelectorAll('.auth-modal .close-modal, .auth-modal .modal-overlay').forEach(element => {
+        element.addEventListener('click', closeAuthModal);
+    });
+    
+    // 切换表单类型
+    document.querySelectorAll('.auth-switch').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetForm = this.getAttribute('data-target');
+            switchAuthForm(targetForm);
+        });
+    });
+}
+
+// 显示认证模态框
+function showAuthModal(type = 'login') {
+    // 创建模态框HTML（如果不存在）
+    if (!document.querySelector('.auth-modal')) {
+        createAuthModal();
+    }
+    
+    // 显示模态框
+    const modal = document.querySelector('.auth-modal');
+    modal.classList.add('active');
+    authState.authModalOpen = true;
+    
+    // 禁用页面滚动
+    document.body.style.overflow = 'hidden';
+    
+    // 切换到指定表单类型
+    switchAuthForm(type);
+}
+
+// 创建认证模态框
+function createAuthModal() {
+    const modalHTML = `
+        <div class="auth-modal">
+            <div class="modal-overlay"></div>
+            <div class="modal-content">
+                <button class="close-modal">×</button>
+                
+                <div class="auth-forms">
+                    <!-- 登录表单 -->
+                    <form id="loginForm" class="auth-form active">
+                        <h2>用户登录</h2>
+                        <div class="form-group">
+                            <label for="loginEmail">邮箱地址</label>
+                            <input type="email" id="loginEmail" placeholder="请输入邮箱" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">密码</label>
+                            <input type="password" id="loginPassword" placeholder="请输入密码" required>
+                            <div class="form-options">
+                                <label>
+                                    <input type="checkbox" id="rememberMe">
+                                    <span>记住我</span>
+                                </label>
+                                <a href="#" class="forgot-password" data-target="reset">忘记密码？</a>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">登录</button>
+                        <div class="auth-switch">
+                            还没有账号？ <a href="#" data-target="register">立即注册</a>
+                        </div>
+                    </form>
+                    
+                    <!-- 注册表单 -->
+                    <form id="registerForm" class="auth-form">
+                        <h2>用户注册</h2>
+                        <div class="form-group">
+                            <label for="registerUsername">用户名</label>
+                            <input type="text" id="registerUsername" placeholder="请输入用户名" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail">邮箱地址</label>
+                            <input type="email" id="registerEmail" placeholder="请输入邮箱" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">密码</label>
+                            <input type="password" id="registerPassword" placeholder="至少6个字符" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerConfirmPassword">确认密码</label>
+                            <input type="password" id="registerConfirmPassword" placeholder="再次输入密码" required>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="acceptTerms" required>
+                                <span>我已阅读并同意 <a href="#">服务条款</a> 和 <a href="#">隐私政策</a></span>
+                            </label>
+                        </div>
+                        <button type="submit" class="btn-primary">注册</button>
+                        <div class="auth-switch">
+                            已有账号？ <a href="#" data-target="login">立即登录</a>
+                        </div>
+                    </form>
+                    
+                    <!-- 重置密码表单 -->
+                    <form id="resetForm" class="auth-form">
+                        <h2>重置密码</h2>
+                        <div class="form-group">
+                            <label for="resetEmail">邮箱地址</label>
+                            <input type="email" id="resetEmail" placeholder="请输入注册邮箱" required>
+                        </div>
+                        <button type="submit" class="btn-primary">发送重置链接</button>
+                        <div class="auth-switch">
+                            <a href="#" data-target="login">返回登录</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // 添加样式
+    if (!document.querySelector('style#auth-modal-styles')) {
+        const style = document.createElement('style');
+        style.id = 'auth-modal-styles';
+        style.textContent = `
+            .auth-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                z-index: 1003;
+                padding: 20px;
+            }
+            
+            .auth-modal.active {
+                display: flex;
+            }
+            
+            .auth-modal .modal-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+            }
+            
+            .auth-modal .modal-content {
+                position: relative;
+                background: white;
+                border-radius: var(--border-radius);
+                width: 100%;
+                max-width: 450px;
+                padding: 40px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                z-index: 1;
+            }
+            
+            .auth-modal .close-modal {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                color: var(--gray-color);
+            }
+            
+            .auth-form {
+                display: none;
+            }
+            
+            .auth-form.active {
+                display: block;
+                animation: fadeIn 0.3s ease;
+            }
+            
+            .auth-form h2 {
+                text-align: center;
+                margin-bottom: 30px;
+                color: var(--dark-color);
+            }
+            
+            .auth-form .form-group {
+                margin-bottom: 20px;
+            }
+            
+            .auth-form label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 500;
+            }
+            
+            .auth-form input[type="text"],
+            .auth-form input[type="email"],
+            .auth-form input[type="password"] {
+                width: 100%;
+                padding: 12px;
+                border: 1px solid var(--light-gray);
+                border-radius: var(--border-radius);
+                font-size: 16px;
+            }
+            
+            .auth-form input:focus {
+                border-color: var(--primary-color);
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.1);
+            }
+            
+            .form-options {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 8px;
+                font-size: 14px;
+            }
+            
+            .form-options label {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                margin: 0;
+                font-weight: normal;
+            }
+            
+            .forgot-password {
+                color: var(--primary-color);
+                text-decoration: none;
+            }
+            
+            .forgot-password:hover {
+                text-decoration: underline;
+            }
+            
+            .auth-form .btn-primary {
+                width: 100%;
+                margin-top: 10px;
+            }
+            
+            .auth-switch {
+                text-align: center;
+                margin-top: 20px;
+                color: var(--gray-color);
+                font-size: 14px;
+            }
+            
+            .auth-switch a {
+                color: var(--primary-color);
+                text-decoration: none;
+                font-weight: 500;
+            }
+            
+            .auth-switch a:hover {
+                text-decoration: underline;
+            }
+            
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
+// 关闭认证模态框
+function closeAuthModal() {
+    const modal = document.querySelector('.auth-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        authState.authModalOpen = false;
+        
+        // 恢复页面滚动
+        document.body.style.overflow = '';
+    }
+}
+
+// 切换认证表单
+function switchAuthForm(type) {
+    // 隐藏所有表单
+    document.querySelectorAll('.auth-form').forEach(form => {
+        form.classList.remove('active');
+    });
+    
+    // 显示目标表单
+    const targetForm = document.getElementById(type + 'Form');
+    if (targetForm) {
+        targetForm.classList.add('active');
+        
+        // 自动聚焦第一个输入框
+        const firstInput = targetForm.querySelector('input[type="text"], input[type="email"]');
+        if (firstInput) {
+            firstInput.focus();
+        }
+    }
+}
+
+// 处理登录
+async function handleLogin(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const rememberMe = document.getElementById('rememberMe').checked;
+    
+    // 验证输入
+    if (!email || !password) {
+        showNotification('请填写邮箱和密码', 'warning');
+        return;
+    }
+    
+    if (!isValidEmail(email)) {
+        showNotification('请输入有效的邮箱地址', 'warning');
+        return;
+    }
+    
+    // 显示加载状态
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = '登录中...';
+    submitBtn.disabled = true;
+    
+    try {
+        // 模拟API请求延迟
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // 验证用户
+        const user = await authenticateUser(email, password);
+        
+        if (user) {
+            // 登录成功
+            authState.user = user;
+            authState.isAuthenticated = true;
+            
+            // 保存用户信息
+            localStorage.setItem('user', JSON.stringify(user));
+            
+            // 更新UI
+            updateAuthUI();
+            
+            // 关闭模态框
+            closeAuthModal();
+            
+            // 清空表单
+            event.target.reset();
+            
+            // 显示欢迎消息
+            showNotification(`欢迎回来，${user.username}！`, 'success');
+            
+            // 重定向到原页面或首页
+            setTimeout(() => {
+                if (window.location.pathname.includes('account.html')) {
+                    window.location.reload();
+                } else if (window.location.hash === '#login') {
+                    window.location.hash = '#profile';
+                }
+            }, 500);
+        } else {
+            throw new Error('邮箱或密码错误');
+        }
+    } catch (error) {
+        showNotification(error.message || '登录失败，请重试', 'error');
+    } finally {
+        // 恢复按钮状态
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+// 处理注册
+async function handleRegister(event) {
+    event.preventDefault();
+    
+    const username = document.getElementById('registerUsername').value.trim();
+    const email = document.getElementById('registerEmail').value.trim();
+    const password = document.getElementById('registerPassword').value;
+    const confirmPassword = document.getElementById('registerConfirmPassword').value;
+    const acceptTerms = document.getElementById('acceptTerms').checked;
+    
+    // 验证输入
+    if (!username || !email || !password || !confirmPassword) {
+        showNotification('请填写所有必填字段', 'warning');
+        return;
+    }
+    
+    if (!isValidEmail(email)) {
+        showNotification('请输入有效的邮箱地址', 'warning');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showNotification('密码至少需要6个字符', 'warning');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        showNotification('两次输入的密码不一致', 'warning');
+        return;
+    }
+    
+    if (!acceptTerms) {
+        showNotification('请同意服务条款和隐私政策', 'warning');
+        return;
+    }
+    
+    // 显示加载状态
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = '注册中...';
+    submitBtn.disabled = true;
+    
+    try {
+        // 模拟API请求延迟
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // 检查用户是否已存在
+        if (await userExists(email)) {
+            throw new Error('该邮箱已被注册');
+        }
+        
+        // 创建用户
+        const user = await createUser(username, email, password);
+        
+        // 注册成功
+        authState.user = user;
+        authState.isAuthenticated = true;
+        
+        // 保存用户信息
+        localStorage.setItem('user', JSON.stringify(user));
+        
+        // 更新UI
+        updateAuthUI();
+        
+        // 切换到登录表单
+        switchAuthForm('login');
+        
+        // 清空表单
+        event.target.reset();
+        
+        // 显示成功消息
+        showNotification('注册成功！请使用新账户登录。', 'success');
+        
+        // 自动填充登录表单
+        document.getElementById('loginEmail').value = email;
+        document.getElementById('loginPassword').value = password;
+        
+    } catch (error) {
+        showNotification(error.message || '注册失败，请重试', 'error');
+    } finally {
+        // 恢复按钮状态
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+// 处理密码重置
+async function handlePasswordReset(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('resetEmail').value.trim();
+    
+    // 验证输入
+    if (!email) {
+        showNotification('请输入邮箱地址', 'warning');
+        return;
+    }
+    
+    if (!isValidEmail(email)) {
+        showNotification('请输入有效的邮箱地址', 'warning');
+        return;
+    }
+    
+    // 显示加载状态
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = '发送中...';
+    submitBtn.disabled = true;
+    
+    try {
+        // 模拟API请求延迟
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // 检查用户是否存在
+        if (!await userExists(email)) {
+            throw new Error('该邮箱未注册');
+        }
+        
+        // 模拟发送重置邮件
+        await sendPasswordResetEmail(email);
+        
+        // 显示成功消息
+        showNotification('重置链接已发送到您的邮箱，请查收。', 'success');
+        
+        // 清空表单
+        event.target.reset();
+        
+        // 切换到登录表单
+        setTimeout(() => {
+            switchAuthForm('login');
+        }, 1500);
+        
+    } catch (error) {
+        showNotification(error.message || '发送重置链接失败', 'error');
+    } finally {
+        // 恢复按钮状态
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+// 验证邮箱格式
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+// 模拟用户认证
+async function authenticateUser(email, password) {
+    // 模拟从本地存储获取用户
+    const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
+    
+    // 查找用户
+    const user = storedUsers.find(u => u.email === email && u.password === password);
+    
+    if (user) {
+        return {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            avatar: user.avatar,
+            regDate: user.regDate
+        };
+    }
+    
+    // 如果没找到，检查默认用户
+    if (email === 'user@example.com' && password === 'password123') {
+        return {
+            id: 1,
+            username: '家居爱好者',
+            email: 'user@example.com',
+            avatar: null,
+            regDate: '2023-01-15'
+        };
+    }
+    
+    return null;
+}
+
+// 检查用户是否存在
+async function userExists(email) {
+    // 模拟检查用户
+    const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
+    return storedUsers.some(u => u.email === email);
+}
+
+// 创建用户
+async function createUser(username, email, password) {
+    // 生成用户ID
+    const userId = Date.now();
+    
+    // 创建用户对象
+    const newUser = {
+        id: userId,
+        username: username,
+        email: email,
+        password: password, // 注意：实际应用中应该加密存储
+        avatar: null,
+        regDate: new Date().toISOString().split('T')[0],
+        createdAt: new Date().toISOString()
+    };
+    
+    // 保存到本地存储
+    let storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
+    storedUsers.push(newUser);
+    localStorage.setItem('users', JSON.stringify(storedUsers));
+    
+    // 返回用户信息（不包含密码）
+    return {
+        id: newUser.id,
+        username: newUser.username,
+        email: newUser.email,
+        avatar: newUser.avatar,
+        regDate: newUser.regDate
+    };
+}
+
+// 发送密码重置邮件
+async function sendPasswordResetEmail(email) {
+    // 模拟发送邮件
+    console.log(`发送密码重置邮件到: ${email}`);
+    return true;
+}
+
+// 设置退出登录
+function setupLogout() {
+    document.querySelectorAll('#logout-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            logout();
+        });
+    });
+}
+
+// 退出登录
+function logout() {
+    if (confirm('确定要退出登录吗？')) {
+        // 清除用户状态
+        authState.user = null;
+        authState.isAuthenticated = false;
+        
+        // 清除本地存储
+        localStorage.removeItem('user');
+        
+        // 更新UI
+        updateAuthUI();
+        
+        // 显示消息
+        showNotification('已退出登录', 'success');
+        
+        // 如果是账户页面，跳转到首页
+        if (window.location.pathname.includes('account.html')) {
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 500);
+        }
+    }
+}
+
+// 检查认证参数
+function checkAuthParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get('auth');
+    
+    if (action === 'login' || action === 'register') {
+        showAuthModal(action);
+        
+        // 从URL中移除参数
+        const url = new URL(window.location);
+        url.searchParams.delete('auth');
+        window.history.replaceState({}, '', url);
+    }
+}
+
+// 显示通知
+function showNotification(message, type = 'info') {
+    // 创建通知元素
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    // 添加到页面
+    document.body.appendChild(notification);
+    
+    // 显示动画
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    // 3秒后移除
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+

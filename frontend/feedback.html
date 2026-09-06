@@ -1,0 +1,1164 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户反馈 - 栖序空间生活美学</title>
+    <link rel="stylesheet" href="./src/styles/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        .feedback-header {
+            background: linear-gradient(135deg, #1e2327 0%, #354047 100%);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+        
+        .feedback-header h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .feedback-form-section {
+            padding: 60px 0;
+            background: var(--light-color);
+        }
+        
+        .feedback-form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 40px;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .form-step {
+            display: none;
+        }
+        
+        .form-step.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--light-gray);
+            z-index: 1;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border: 2px solid var(--light-gray);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-bottom: 10px;
+            transition: var(--transition);
+        }
+        
+        .step.active .step-number {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .step.completed .step-number {
+            background: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+        
+        .step-label {
+            font-size: 14px;
+            color: var(--gray-color);
+        }
+        
+        .step.active .step-label {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .feedback-type-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .feedback-type {
+            padding: 30px 20px;
+            background: var(--light-color);
+            border: 2px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .feedback-type:hover,
+        .feedback-type.selected {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-5px);
+        }
+        
+        .feedback-type i {
+            font-size: 32px;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .rating-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .rating-stars {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+        }
+        
+        .rating-star {
+            font-size: 40px;
+            color: var(--light-gray);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .rating-star:hover,
+        .rating-star.active {
+            color: var(--warning-color);
+            transform: scale(1.2);
+        }
+        
+        .rating-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--gray-color);
+        }
+        
+        .feedback-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .category-checkbox {
+            display: none;
+        }
+        
+        .category-label {
+            display: block;
+            padding: 15px;
+            background: var(--light-color);
+            border: 2px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .category-checkbox:checked + .category-label {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: var(--transition);
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.1);
+            outline: none;
+        }
+        
+        .character-count {
+            text-align: right;
+            font-size: 14px;
+            color: var(--gray-color);
+            margin-top: 5px;
+        }
+        
+        .character-count.warning {
+            color: var(--warning-color);
+        }
+        
+        .character-count.error {
+            color: var(--danger-color);
+        }
+        
+        .screenshot-upload {
+            border: 2px dashed var(--light-gray);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+        
+        .screenshot-upload:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .screenshot-upload i {
+            font-size: 48px;
+            color: var(--gray-color);
+            margin-bottom: 15px;
+        }
+        
+        .screenshot-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .screenshot-item {
+            width: 100px;
+            height: 100px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .screenshot-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .remove-screenshot {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .contact-consent {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: var(--light-color);
+            border-radius: var(--border-radius);
+        }
+        
+        .form-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+        
+        .feedback-history {
+            padding: 80px 0;
+            background: white;
+        }
+        
+        .history-filters {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .history-grid {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .feedback-item {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .feedback-header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .feedback-type-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: var(--light-color);
+            color: var(--primary-color);
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .feedback-date {
+            color: var(--gray-color);
+            font-size: 14px;
+        }
+        
+        .feedback-rating {
+            color: var(--warning-color);
+            margin-bottom: 10px;
+        }
+        
+        .feedback-content {
+            margin-bottom: 20px;
+        }
+        
+        .feedback-content h4 {
+            margin-bottom: 10px;
+            color: var(--dark-color);
+        }
+        
+        .feedback-images {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .feedback-image {
+            width: 80px;
+            height: 80px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .feedback-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .feedback-response {
+            margin-top: 20px;
+            padding: 20px;
+            background: var(--light-color);
+            border-radius: var(--border-radius);
+            border-left: 3px solid var(--success-color);
+        }
+        
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .response-admin {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .response-date {
+            color: var(--gray-color);
+            font-size: 14px;
+        }
+        
+        .feedback-status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-reviewed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .status-resolved {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-closed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .testimonials-section {
+            padding: 80px 0;
+            background: var(--light-color);
+        }
+        
+        .testimonials-slider {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .testimonial-slide {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 40px;
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            display: none;
+        }
+        
+        .testimonial-slide.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .testimonial-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+        }
+        
+        .testimonial-content {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+            font-style: italic;
+        }
+        
+        .testimonial-author {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .testimonial-info {
+            color: var(--gray-color);
+            font-size: 14px;
+        }
+        
+        .slider-controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .slider-btn {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border: 2px solid var(--light-gray);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: var(--transition);
+        }
+        
+        .slider-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .slider-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .slider-dot {
+            width: 12px;
+            height: 12px;
+            background: var(--light-gray);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .slider-dot.active {
+            background: var(--primary-color);
+        }
+        
+        .roadmap-section {
+            padding: 80px 0;
+            background: white;
+        }
+        
+        .roadmap-timeline {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .roadmap-timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 20px;
+            width: 2px;
+            background: var(--light-gray);
+        }
+        
+        .roadmap-item {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .roadmap-date {
+            width: 120px;
+            text-align: right;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .roadpoint {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border: 3px solid var(--primary-color);
+            border-radius: 50%;
+            position: absolute;
+            left: 2px;
+            top: 0;
+            z-index: 1;
+        }
+        
+        .roadmap-content {
+            flex: 1;
+            background: var(--light-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .roadmap-content h3 {
+            margin-bottom: 10px;
+            color: var(--dark-color);
+        }
+        
+        .roadmap-content p {
+            color: var(--gray-color);
+            margin-bottom: 15px;
+        }
+        
+        .feature-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .feature-tag {
+            padding: 4px 10px;
+            background: white;
+            color: var(--primary-color);
+            border-radius: 15px;
+            font-size: 12px;
+            border: 1px solid var(--light-gray);
+        }
+        
+        .roadmap-item.completed .roadpoint {
+            background: var(--success-color);
+            border-color: var(--success-color);
+        }
+        
+        .roadmap-item.in-progress .roadpoint {
+            background: var(--warning-color);
+            border-color: var(--warning-color);
+        }
+        
+        .roadmap-item.planned .roadpoint {
+            background: var(--light-gray);
+            border-color: var(--light-gray);
+        }
+        
+        @media (max-width: 768px) {
+            .feedback-form-container {
+                padding: 25px;
+            }
+            
+            .feedback-type-selection {
+                grid-template-columns: 1fr;
+            }
+            
+            .step-indicator {
+                flex-direction: column;
+                align-items: center;
+                gap: 30px;
+            }
+            
+            .step-indicator::before {
+                display: none;
+            }
+            
+            .roadmap-item {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .roadmap-date {
+                text-align: left;
+                width: 100%;
+            }
+            
+            .roadpoint {
+                display: none;
+            }
+            
+            .roadmap-timeline::before {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html">
+                    <i class="fas fa-home"></i>
+                    <span>栖序空间生活美学</span>
+                </a>
+            </div>
+            <div class="nav-links">
+                <a href="index.html"><i class="fas fa-home"></i> 首页</a>
+                <a href="shopping.html"><i class="fas fa-shopping-cart"></i> 购物</a>
+                <a href="design-tool.html"><i class="fas fa-ruler-combined"></i> 设计工具</a>
+                <a href="recommendations.html"><i class="fas fa-lightbulb"></i> 方案推荐</a>
+                <a href="community.html"><i class="fas fa-users"></i> 社区支持</a>
+                <a href="consultation.html"><i class="fas fa-comments"></i> 在线咨询</a>
+                <div class="nav-dropdown">
+                    <a href="#"><i class="fas fa-user"></i> 个人账户 <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        <a href="account.html"><i class="fas fa-user-circle"></i> 我的账户</a>
+                        <a href="account.html#history"><i class="fas fa-history"></i> 浏览历史</a>
+                        <a href="account.html#favorites"><i class="fas fa-heart"></i> 我的收藏</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> 退出登录</a>
+                    </div>
+                </div>
+                <a href="feedback.html" class="active btn-feedback"><i class="fas fa-comment-dots"></i> 反馈</a>
+            </div>
+            <div class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 移动端菜单 -->
+    <div class="mobile-nav">
+        <a href="index.html"><i class="fas fa-home"></i> 首页</a>
+        <a href="shopping.html"><i class="fas fa-shopping-cart"></i> 购物</a>
+        <a href="design-tool.html"><i class="fas fa-ruler-combined"></i> 设计工具</a>
+        <a href="recommendations.html"><i class="fas fa-lightbulb"></i> 方案推荐</a>
+        <a href="community.html"><i class="fas fa-users"></i> 社区支持</a>
+        <a href="consultation.html"><i class="fas fa-comments"></i> 在线咨询</a>
+        <a href="account.html"><i class="fas fa-user"></i> 个人账户</a>
+        <a href="feedback.html"><i class="fas fa-comment-dots"></i> 用户反馈</a>
+    </div>
+
+    <!-- 主内容区 -->
+    <main>
+        <!-- 用户反馈头部 -->
+        <section class="feedback-header">
+            <div class="container">
+                <h1>用户反馈与建议</h1>
+                <p>您的意见对我们非常重要，帮助我们不断改进和完善平台</p>
+            </div>
+        </section>
+
+        <!-- 反馈表单 -->
+        <section class="feedback-form-section">
+            <div class="container">
+                <div class="feedback-form-container">
+                    <div class="step-indicator">
+                        <div class="step active" id="step1-indicator">
+                            <div class="step-number">1</div>
+                            <div class="step-label">反馈类型</div>
+                        </div>
+                        <div class="step" id="step2-indicator">
+                            <div class="step-number">2</div>
+                            <div class="step-label">评价内容</div>
+                        </div>
+                        <div class="step" id="step3-indicator">
+                            <div class="step-number">3</div>
+                            <div class="step-label">详细信息</div>
+                        </div>
+                        <div class="step" id="step4-indicator">
+                            <div class="step-number">4</div>
+                            <div class="step-label">确认提交</div>
+                        </div>
+                    </div>
+                    
+                    <form id="feedbackForm">
+                        <!-- 步骤1：反馈类型 -->
+                        <div class="form-step active" id="step1">
+                            <h3 style="margin-bottom: 30px; text-align: center; color: var(--dark-color);">请选择反馈类型</h3>
+                            
+                            <div class="feedback-type-selection">
+                                <div class="feedback-type" onclick="selectFeedbackType('bug')">
+                                    <i class="fas fa-bug"></i>
+                                    <h4>问题报告</h4>
+                                    <p>报告功能故障或技术问题</p>
+                                </div>
+                                
+                                <div class="feedback-type" onclick="selectFeedbackType('suggestion')">
+                                    <i class="fas fa-lightbulb"></i>
+                                    <h4>功能建议</h4>
+                                    <p>提出新功能或改进建议</p>
+                                </div>
+                                
+                                <div class="feedback-type" onclick="selectFeedbackType('design')">
+                                    <i class="fas fa-paint-brush"></i>
+                                    <h4>设计反馈</h4>
+                                    <p>对界面或用户体验的建议</p>
+                                </div>
+                                
+                                <div class="feedback-type" onclick="selectFeedbackType('other')">
+                                    <i class="fas fa-comment"></i>
+                                    <h4>其他反馈</h4>
+                                    <p>其他类型的反馈和建议</p>
+                                </div>
+                            </div>
+                            
+                            <input type="hidden" id="feedbackType" required>
+                            
+                            <div class="form-navigation">
+                                <div></div>
+                                <button type="button" class="btn-primary" onclick="nextStep()">下一步</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 步骤2：评价内容 -->
+                        <div class="form-step" id="step2">
+                            <h3 style="margin-bottom: 30px; text-align: center; color: var(--dark-color);">请评价您的体验</h3>
+                            
+                            <div class="rating-section">
+                                <p style="margin-bottom: 20px; font-size: 18px;">总体满意度如何？</p>
+                                <div class="rating-stars" id="ratingStars">
+                                    <i class="fas fa-star rating-star" data-rating="1"></i>
+                                    <i class="fas fa-star rating-star" data-rating="2"></i>
+                                    <i class="fas fa-star rating-star" data-rating="3"></i>
+                                    <i class="fas fa-star rating-star" data-rating="4"></i>
+                                    <i class="fas fa-star rating-star" data-rating="5"></i>
+                                </div>
+                                <div class="rating-labels">
+                                    <span>非常不满意</span>
+                                    <span>非常满意</span>
+                                </div>
+                                <input type="hidden" id="feedbackRating" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>请选择相关功能模块</label>
+                                <div class="feedback-categories">
+                                    <input type="checkbox" id="category-design" class="category-checkbox" name="categories" value="design">
+                                    <label for="category-design" class="category-label">设计工具</label>
+                                    
+                                    <input type="checkbox" id="category-shopping" class="category-checkbox" name="categories" value="shopping">
+                                    <label for="category-shopping" class="category-label">购物功能</label>
+                                    
+                                    <input type="checkbox" id="category-community" class="category-checkbox" name="categories" value="community">
+                                    <label for="category-community" class="category-label">社区功能</label>
+                                    
+                                    <input type="checkbox" id="category-ui" class="category-checkbox" name="categories" value="ui">
+                                    <label for="category-ui" class="category-label">界面设计</label>
+                                    
+                                    <input type="checkbox" id="category-performance" class="category-checkbox" name="categories" value="performance">
+                                    <label for="category-performance" class="category-label">性能表现</label>
+                                    
+                                    <input type="checkbox" id="category-mobile" class="category-checkbox" name="categories" value="mobile">
+                                    <label for="category-mobile" class="category-label">移动端体验</label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-navigation">
+                                <button type="button" class="btn-secondary" onclick="prevStep()">上一步</button>
+                                <button type="button" class="btn-primary" onclick="nextStep()">下一步</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 步骤3：详细信息 -->
+                        <div class="form-step" id="step3">
+                            <h3 style="margin-bottom: 30px; text-align: center; color: var(--dark-color);">请提供详细信息</h3>
+                            
+                            <div class="form-group">
+                                <label for="feedbackTitle">反馈标题</label>
+                                <input type="text" id="feedbackTitle" placeholder="简要描述您的问题或建议" maxlength="100" required>
+                                <div class="character-count" id="titleCount">0/100</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="feedbackDescription">详细描述</label>
+                                <textarea id="feedbackDescription" rows="6" placeholder="请详细描述您遇到的问题、建议或期望的改进..." maxlength="1000" required></textarea>
+                                <div class="character-count" id="descriptionCount">0/1000</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>添加截图（可选）</label>
+                                <div class="screenshot-upload" onclick="document.getElementById('screenshotInput').click()">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>点击上传截图</p>
+                                    <p style="font-size: 14px; color: var(--gray-color);">支持 JPG, PNG 格式，最大 5MB</p>
+                                    <input type="file" id="screenshotInput" accept="image/*" multiple style="display: none;" onchange="handleScreenshotUpload()">
+                                </div>
+                                <div class="screenshot-preview" id="screenshotPreview"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="feedbackPriority">优先级</label>
+                                <select id="feedbackPriority">
+                                    <option value="low">低 - 小问题或优化建议</option>
+                                    <option value="medium" selected>中 - 一般功能问题</option>
+                                    <option value="high">高 - 严重影响使用的问题</option>
+                                    <option value="critical">紧急 - 需要立即处理的问题</option>
+                                </select>
+                            </div>
+                            
+                            <div class="contact-consent">
+                                <input type="checkbox" id="contactConsent">
+                                <label for="contactConsent" style="font-size: 14px; color: var(--gray-color);">
+                                    允许客服人员就此次反馈与您联系，以便更好地解决问题。我们承诺保护您的隐私，仅用于解决反馈相关问题。
+                                </label>
+                            </div>
+                            
+                            <div class="form-navigation">
+                                <button type="button" class="btn-secondary" onclick="prevStep()">上一步</button>
+                                <button type="button" class="btn-primary" onclick="nextStep()">下一步</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 步骤4：确认提交 -->
+                        <div class="form-step" id="step4">
+                            <h3 style="margin-bottom: 30px; text-align: center; color: var(--dark-color);">确认提交反馈</h3>
+                            
+                            <div style="background: var(--light-color); padding: 25px; border-radius: var(--border-radius); margin-bottom: 30px;">
+                                <h4 style="margin-bottom: 15px;">反馈信息摘要</h4>
+                                
+                                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px; margin-bottom: 15px;">
+                                    <strong>反馈类型:</strong>
+                                    <span id="summaryType">未选择</span>
+                                    
+                                    <strong>评分:</strong>
+                                    <span id="summaryRating">未选择</span>
+                                    
+                                    <strong>标题:</strong>
+                                    <span id="summaryTitle">未填写</span>
+                                    
+                                    <strong>优先级:</strong>
+                                    <span id="summaryPriority">中等</span>
+                                </div>
+                                
+                                <div style="margin-top: 20px;">
+                                    <strong>详细描述:</strong>
+                                    <p id="summaryDescription" style="margin-top: 10px; color: var(--gray-color);">未填写</p>
+                                </div>
+                            </div>
+                            
+                            <div class="contact-consent">
+                                <input type="checkbox" id="finalConsent" required>
+                                <label for="finalConsent" style="font-size: 14px; color: var(--gray-color);">
+                                    我已阅读并同意平台的服务条款和隐私政策，确认提交此反馈。
+                                </label>
+                            </div>
+                            
+                            <div class="form-navigation">
+                                <button type="button" class="btn-secondary" onclick="prevStep()">上一步</button>
+                                <button type="submit" class="btn-primary">提交反馈</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- 反馈历史 -->
+        <section class="feedback-history">
+            <div class="container">
+                <h2 style="text-align: center; font-size: 36px; margin-bottom: 50px; color: var(--dark-color); font-family: 'Playfair Display', serif;">
+                    我的反馈历史
+                </h2>
+                
+                <div class="history-filters">
+                    <div>
+                        <span>共 <strong>3</strong> 条反馈记录</span>
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        <select id="historyFilter" style="padding: 8px 15px; border: 1px solid var(--light-gray); border-radius: var(--border-radius);">
+                            <option value="all">全部状态</option>
+                            <option value="pending">待处理</option>
+                            <option value="reviewed">已查看</option>
+                            <option value="resolved">已解决</option>
+                        </select>
+                        
+                        <select id="historySort" style="padding: 8px 15px; border: 1px solid var(--light-gray); border-radius: var(--border-radius);">
+                            <option value="newest">最新优先</option>
+                            <option value="oldest">最早优先</option>
+                            <option value="priority">优先级</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="history-grid" id="feedbackHistory">
+                    <!-- 反馈历史动态加载 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 用户见证 -->
+        <section class="testimonials-section">
+            <div class="container">
+                <h2 style="text-align: center; font-size: 36px; margin-bottom: 50px; color: var(--dark-color); font-family: 'Playfair Display', serif;">
+                    用户见证与感谢
+                </h2>
+                
+                <div class="testimonials-slider">
+                    <div class="testimonial-slide active">
+                        <div class="testimonial-avatar">张</div>
+                        <div class="testimonial-content">
+                            "通过平台的反馈功能，我提出的设计工具改进建议在一个月内就被采纳并实现了。现在使用起来更加流畅，效率提升了很多！"
+                        </div>
+                        <div class="testimonial-author">张先生</div>
+                        <div class="testimonial-info">室内设计师，使用平台2年</div>
+                    </div>
+                    
+                    <div class="testimonial-slide">
+                        <div class="testimonial-avatar">李</div>
+                        <div class="testimonial-content">
+                            "报告了一个购物车功能的小问题，客服很快就联系了我，详细了解了情况，并在下次更新中修复了问题。响应速度和服务态度都很好！"
+                        </div>
+                        <div class="testimonial-author">李女士</div>
+                        <div class="testimonial-info">家居爱好者，使用平台1年</div>
+                    </div>
+                    
+                    <div class="testimonial-slide">
+                        <div class="testimonial-avatar">王</div>
+                        <div class="testimonial-content">
+                            "我提出的移动端优化建议被团队认真考虑，新的移动版本完全解决了之前的问题。能够看到自己的建议被实现，感觉很有成就感！"
+                        </div>
+                        <div class="testimonial-author">王小姐</div>
+                        <div class="testimonial-info">自由职业者，使用平台6个月</div>
+                    </div>
+                    
+                    <div class="slider-controls">
+                        <button class="slider-btn" onclick="prevTestimonial()">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="slider-btn" onclick="nextTestimonial()">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="slider-dots">
+                        <span class="slider-dot active" data-index="0"></span>
+                        <span class="slider-dot" data-index="1"></span>
+                        <span class="slider-dot" data-index="2"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 产品路线图 -->
+        <section class="roadmap-section">
+            <div class="container">
+                <h2 style="text-align: center; font-size: 36px; margin-bottom: 50px; color: var(--dark-color); font-family: 'Playfair Display', serif;">
+                    产品发展路线图
+                </h2>
+                <p style="text-align: center; font-size: 18px; color: var(--gray-color); margin-bottom: 60px; max-width: 800px; margin-left: auto; margin-right: auto;">
+                    基于用户反馈，我们正在规划和开发以下功能改进。感谢所有用户提出的宝贵建议！
+                </p>
+                
+                <div class="roadmap-timeline">
+                    <div class="roadmap-item completed">
+                        <div class="roadmap-date">2023年10月</div>
+                        <div class="roadpoint"></div>
+                        <div class="roadmap-content">
+                            <h3>设计工具优化</h3>
+                            <p>根据用户反馈，改进了设计工具的拖拽体验和渲染性能，新增了更多家具模型和材质选项。</p>
+                            <div class="feature-tags">
+                                <span class="feature-tag">性能优化</span>
+                                <span class="feature-tag">UI改进</span>
+                                <span class="feature-tag">新增模型</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="roadmap-item in-progress">
+                        <div class="roadmap-date">2023年11月</div>
+                        <div class="roadpoint"></div>
+                        <div class="roadmap-content">
+                            <h3>移动端体验升级</h3>
+                            <p>重新设计移动端界面，优化触摸交互，提升在手机和平板上的使用体验。</p>
+                            <div class="feature-tags">
+                                <span class="feature-tag">响应式设计</span>
+                                <span class="feature-tag">触摸优化</span>
+                                <span class="feature-tag">离线功能</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="roadmap-item planned">
+                        <div class="roadmap-date">2023年12月</div>
+                        <div class="roadpoint"></div>
+                        <div class="roadmap-content">
+                            <h3>AI设计助手</h3>
+                            <p>集成人工智能技术，为用户提供智能布局建议和个性化设计方案推荐。</p>
+                            <div class="feature-tags">
+                                <span class="feature-tag">AI算法</span>
+                                <span class="feature-tag">智能推荐</span>
+                                <span class="feature-tag">个性化</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="roadmap-item planned">
+                        <div class="roadmap-date">2024年Q1</div>
+                        <div class="roadpoint"></div>
+                        <div class="roadmap-content">
+                            <h3>3D实景预览</h3>
+                            <p>开发基于WebGL的3D实景渲染功能，让用户能够更真实地预览设计方案效果。</p>
+                            <div class="feature-tags">
+                                <span class="feature-tag">3D渲染</span>
+                                <span class="feature-tag">实时光照</span>
+                                <span class="feature-tag">虚拟现实</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3><i class="fas fa-home"></i> 栖序空间生活美学</h3>
+                    <p>为您提供一站式空间美学、购物与布局服务。打造梦想家居，从我们开始。</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-weixin"></i></a>
+                        <a href="#"><i class="fab fa-weibo"></i></a>
+                        <a href="#"><i class="fab fa-qq"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>快速链接</h4>
+                    <ul>
+                        <li><a href="index.html">首页</a></li>
+                        <li><a href="shopping.html">购物商城</a></li>
+                        <li><a href="design-tool.html">设计工具</a></li>
+                        <li><a href="community.html">社区支持</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>服务支持</h4>
+                    <ul>
+                        <li><a href="consultation.html">在线咨询</a></li>
+                        <li><a href="recommendations.html">方案推荐</a></li>
+                        <li><a href="feedback.html">用户反馈</a></li>
+                        <li><a href="#">帮助中心</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>联系我们</h4>
+                    <ul class="contact-info">
+                        <li><i class="fas fa-phone"></i> 400-123-4567</li>
+                        <li><i class="fas fa-envelope"></i> support@homedesign.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> 北京市朝阳区设计大厦A座</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 栖序空间生活美学. 保留所有权利. | <a href="#">隐私政策</a> | <a href="#">使用条款</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="./src/scripts/main.js"></script>
+    <script src="./src/scripts/feedback.js"></script>
+</body>
+</html>
+

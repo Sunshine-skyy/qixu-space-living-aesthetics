@@ -1,0 +1,288 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设计工具 - 栖序空间生活美学</title>
+    <link rel="stylesheet" href="./src/styles/style.css">
+    <link rel="stylesheet" href="./src/styles/design-tool.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html">
+                    <i class="fas fa-home"></i>
+                    <span>栖序空间生活美学</span>
+                </a>
+            </div>
+            <div class="nav-links">
+                <a href="index.html"><i class="fas fa-home"></i> 首页</a>
+                <a href="shopping.html"><i class="fas fa-shopping-cart"></i> 购物</a>
+                <a href="design-tool.html" class="active"><i class="fas fa-ruler-combined"></i> 设计工具</a>
+                <a href="recommendations.html"><i class="fas fa-lightbulb"></i> 方案推荐</a>
+                <a href="community.html"><i class="fas fa-users"></i> 社区支持</a>
+                <a href="consultation.html"><i class="fas fa-comments"></i> 在线咨询</a>
+                <div class="nav-dropdown">
+                    <a href="#"><i class="fas fa-user"></i> 个人账户 <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        <a href="account.html"><i class="fas fa-user-circle"></i> 我的账户</a>
+                        <a href="account.html#history"><i class="fas fa-history"></i> 浏览历史</a>
+                        <a href="account.html#favorites"><i class="fas fa-heart"></i> 我的收藏</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> 退出登录</a>
+                    </div>
+                </div>
+                <a href="feedback.html" class="btn-feedback"><i class="fas fa-comment-dots"></i> 反馈</a>
+            </div>
+            <div class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 移动端菜单 -->
+    <div class="mobile-nav">
+        <!-- 与首页相同 -->
+    </div>
+
+    <!-- 主内容区 -->
+    <main>
+        <!-- 设计工具头部 -->
+        <section class="design-header">
+            <div class="container">
+                <h1>空间美学工具</h1>
+                <p>拖拽式布局，实时预览，打造您的梦想空间</p>
+            </div>
+        </section>
+
+        <!-- 设计工具主界面 -->
+        <section class="design-tool">
+            <div class="container">
+                <div class="design-layout">
+                    <!-- 左侧工具栏 -->
+                    <div class="design-sidebar">
+                        <div class="tool-section">
+                            <h3><i class="fas fa-layer-group"></i> 房间模板</h3>
+                            <div class="room-templates">
+                                <div class="room-template" data-template="living-room">
+                                    <div class="template-icon">
+                                        <i class="fas fa-couch"></i>
+                                    </div>
+                                    <span>客厅</span>
+                                </div>
+                                <div class="room-template" data-template="bedroom">
+                                    <div class="template-icon">
+                                        <i class="fas fa-bed"></i>
+                                    </div>
+                                    <span>卧室</span>
+                                </div>
+                                <div class="room-template" data-template="kitchen">
+                                    <div class="template-icon">
+                                        <i class="fas fa-utensils"></i>
+                                    </div>
+                                    <span>厨房</span>
+                                </div>
+                                <div class="room-template" data-template="office">
+                                    <div class="template-icon">
+                                        <i class="fas fa-desktop"></i>
+                                    </div>
+                                    <span>书房</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tool-section">
+                            <h3><i class="fas fa-chair"></i> 家具库</h3>
+                            <div class="furniture-categories">
+                                <div class="category-tabs">
+                                    <button class="category-tab active" data-category="all">全部</button>
+                                    <button class="category-tab" data-category="seating">座椅</button>
+                                    <button class="category-tab" data-category="tables">桌子</button>
+                                    <button class="category-tab" data-category="bed">床具</button>
+                                    <button class="category-tab" data-category="storage">储物</button>
+                                    <button class="category-tab" data-category="lighting">灯具</button>
+                                    <button class="category-tab" data-category="structure">结构</button>
+                                </div>
+                                <div class="furniture-items">
+                                    <!-- 家具项目动态加载 -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tool-section">
+                            <h3><i class="fas fa-palette"></i> 颜色主题</h3>
+                            <div class="color-themes">
+                                <div class="color-theme" data-theme="light">
+                                    <div class="theme-preview" style="background: linear-gradient(135deg, #f2f4f2, #d8dfe6);"></div>
+                                    <span>明亮</span>
+                                </div>
+                                <div class="color-theme" data-theme="dark">
+                                    <div class="theme-preview" style="background: linear-gradient(135deg, #1e2327, #354047);"></div>
+                                    <span>深色</span>
+                                </div>
+                                <div class="color-theme" data-theme="warm">
+                                    <div class="theme-preview" style="background: linear-gradient(135deg, #d8dfe6, #c9d1c8);"></div>
+                                    <span>温暖</span>
+                                </div>
+                                <div class="color-theme" data-theme="cool">
+                                    <div class="theme-preview" style="background: linear-gradient(135deg, #f2f4f2, #8fa0a8);"></div>
+                                    <span>清凉</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 设计画布 -->
+                    <div class="design-canvas-container">
+                        <div class="canvas-toolbar">
+                            <div class="toolbar-left">
+                                <button class="tool-btn" id="selectTool" title="选择工具">
+                                    <i class="fas fa-mouse-pointer"></i>
+                                </button>
+                                <button class="tool-btn" id="moveTool" title="移动工具">
+                                    <i class="fas fa-arrows-alt"></i>
+                                </button>
+                                <button class="tool-btn" id="rotateTool" title="旋转工具">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <button class="tool-btn" id="deleteTool" title="删除工具">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <button class="tool-btn" id="gridToggle" title="显示网格">
+                                    <i class="fas fa-th"></i>
+                                </button>
+                            </div>
+                            <div class="toolbar-right">
+                                <button class="tool-btn" id="undoBtn" title="撤销">
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                                <button class="tool-btn" id="redoBtn" title="重做">
+                                    <i class="fas fa-redo"></i>
+                                </button>
+                                <button class="tool-btn" id="saveBtn" title="保存设计">
+                                    <i class="fas fa-save"></i>
+                                </button>
+                                <button class="tool-btn" id="exportBtn" title="导出图片">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="design-canvas" id="designCanvas">
+                            <!-- 设计画布内容 -->
+                            <div class="room-outline">
+                                <!-- 房间轮廓和家具将动态添加 -->
+                            </div>
+                        </div>
+                        <div class="canvas-status">
+                            <span>比例尺: 1:50</span>
+                            <span>当前工具: <span id="currentTool">选择工具</span></span>
+                            <span>元素数量: <span id="elementCount">0</span></span>
+                        </div>
+                    </div>
+
+                    <!-- 右侧属性面板 -->
+                    <div class="properties-panel">
+                        <div class="properties-section">
+                            <h3><i class="fas fa-cog"></i> 属性设置</h3>
+                            <div class="property-group">
+                                <label>元素名称</label>
+                                <input type="text" id="elementName" placeholder="输入元素名称">
+                            </div>
+                            <div class="property-group">
+                                <label>尺寸</label>
+                                <div class="dimension-inputs">
+                                    <input type="number" id="widthInput" placeholder="宽度" min="10" max="1000">
+                                    <span>×</span>
+                                    <input type="number" id="heightInput" placeholder="高度" min="10" max="1000">
+                                    <span>cm</span>
+                                </div>
+                            </div>
+                            <div class="property-group">
+                                <label>颜色</label>
+                                <div class="color-picker">
+                                    <input type="color" id="colorPicker" value="#8fa0a8">
+                                    <span id="selectedColor">#8fa0a8</span>
+                                </div>
+                            </div>
+                            <div class="property-group">
+                                <label>旋转角度</label>
+                                <input type="range" id="rotationSlider" min="0" max="360" value="0">
+                                <span id="rotationValue">0°</span>
+                            </div>
+                        </div>
+
+                        <div class="properties-section">
+                            <h3><i class="fas fa-eye"></i> 预览</h3>
+                            <div class="preview-container">
+                                <div class="design-preview" id="designPreview">
+                                    <!-- 设计预览 -->
+                                </div>
+                            </div>
+                            <button class="btn-primary" id="renderBtn" style="width: 100%; margin-top: 15px;">
+                                <i class="fas fa-camera"></i> 渲染预览
+                            </button>
+                        </div>
+
+                        <div class="properties-section">
+                            <h3><i class="fas fa-shopping-cart"></i> 购物清单</h3>
+                            <div class="shopping-list" id="shoppingList">
+                                <!-- 购物清单项目 -->
+                                <div class="empty-list">
+                                    <i class="fas fa-shopping-basket"></i>
+                                    <p>暂无商品</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 模板库 -->
+        <section class="templates-section">
+            <div class="container">
+                <h2>推荐设计模板</h2>
+                <div class="templates-grid">
+                    <div class="template-card">
+                        <div class="template-image" style="background-image: url('https://images.unsplash.com/photo-1615529328331-f8917597711f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80');"></div>
+                        <div class="template-info">
+                            <h3>现代简约客厅</h3>
+                            <p>简约风格，适合小户型</p>
+                            <button class="btn-outline use-template" data-template="modern-living">使用模板</button>
+                        </div>
+                    </div>
+                    <div class="template-card">
+                        <div class="template-image" style="background-image: url('https://images.unsplash.com/photo-1615529328331-f8917597711f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80');"></div>
+                        <div class="template-info">
+                            <h3>北欧风格卧室</h3>
+                            <p>温馨舒适，自然元素</p>
+                            <button class="btn-outline use-template" data-template="nordic-bedroom">使用模板</button>
+                        </div>
+                    </div>
+                    <div class="template-card">
+                        <div class="template-image" style="background-image: url('https://images.unsplash.com/photo-1615529328331-f8917597711f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80');"></div>
+                        <div class="template-info">
+                            <h3>工业风工作室</h3>
+                            <p>创意空间，个性十足</p>
+                            <button class="btn-outline use-template" data-template="industrial-office">使用模板</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <!-- 与首页相同 -->
+    </footer>
+
+    <script src="./src/scripts/main.js"></script>
+    <script src="./src/scripts/design-tool.js"></script>
+</body>
+</html>
+

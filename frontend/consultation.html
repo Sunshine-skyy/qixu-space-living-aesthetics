@@ -1,0 +1,866 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线咨询 - 栖序空间生活美学</title>
+    <link rel="stylesheet" href="./src/styles/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        .consultation-header {
+            background: linear-gradient(135deg, #1e2327 0%, #354047 100%);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+        
+        .consultation-header h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .consultation-types {
+            padding: 60px 0;
+            background: var(--light-color);
+        }
+        
+        .types-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .type-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+        
+        .type-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .type-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+        }
+        
+        .type-card h3 {
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+        
+        .type-card p {
+            color: var(--gray-color);
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .type-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+        }
+        
+        .designer-section {
+            padding: 80px 0;
+            background: white;
+        }
+        
+        .designer-filters {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .designer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        
+        .designer-card {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+        
+        .designer-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+        }
+        
+        .designer-header {
+            padding: 30px 20px 0;
+            text-align: center;
+            position: relative;
+        }
+        
+        .designer-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            border: 4px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: white;
+        }
+        
+        .online-status {
+            position: absolute;
+            top: 35px;
+            right: 35px;
+            width: 12px;
+            height: 12px;
+            background: var(--success-color);
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        
+        .online-status.offline {
+            background: var(--gray-color);
+        }
+        
+        .designer-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .designer-title {
+            color: var(--primary-color);
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .designer-rating {
+            color: var(--warning-color);
+            margin-bottom: 15px;
+        }
+        
+        .designer-specialties {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+        
+        .specialty-tag {
+            padding: 4px 10px;
+            background: var(--light-color);
+            color: var(--primary-color);
+            border-radius: 15px;
+            font-size: 12px;
+        }
+        
+        .designer-content {
+            padding: 0 20px 20px;
+        }
+        
+        .designer-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            display: block;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--gray-color);
+        }
+        
+        .designer-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-section {
+            padding: 80px 0;
+            background: var(--light-color);
+        }
+        
+        .chat-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            padding: 20px;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-partner {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .partner-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .partner-info h3 {
+            margin-bottom: 5px;
+        }
+        
+        .chat-status {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+        }
+        
+        .message.received {
+            align-self: flex-start;
+            background: var(--light-color);
+            border-top-left-radius: 4px;
+        }
+        
+        .message.sent {
+            align-self: flex-end;
+            background: var(--primary-color);
+            color: white;
+            border-top-right-radius: 4px;
+        }
+        
+        .message-time {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 5px;
+            text-align: right;
+        }
+        
+        .message.sent .message-time {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .chat-input {
+            padding: 20px;
+            border-top: 1px solid var(--light-gray);
+            display: flex;
+            gap: 15px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+        }
+        
+        .send-btn {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: var(--transition);
+        }
+        
+        .send-btn:hover {
+            background: var(--secondary-color);
+            transform: scale(1.05);
+        }
+        
+        .faq-section {
+            padding: 80px 0;
+            background: white;
+        }
+        
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .faq-item {
+            margin-bottom: 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+        
+        .faq-question {
+            padding: 20px;
+            background: var(--light-color);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+        }
+        
+        .faq-answer {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .faq-answer.active {
+            padding: 20px;
+            max-height: 500px;
+        }
+        
+        .booking-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1002;
+            padding: 20px;
+        }
+        
+        .booking-modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray-color);
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+        }
+        
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .time-slot {
+            padding: 10px;
+            background: var(--light-color);
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .time-slot:hover,
+        .time-slot.selected {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .time-slot.booked {
+            background: var(--light-gray);
+            color: var(--gray-color);
+            cursor: not-allowed;
+        }
+        
+        @media (max-width: 768px) {
+            .types-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .designer-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .designer-actions {
+                flex-direction: column;
+            }
+            
+            .time-slots {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html">
+                    <i class="fas fa-home"></i>
+                    <span>栖序空间生活美学</span>
+                </a>
+            </div>
+            <div class="nav-links">
+                <a href="index.html"><i class="fas fa-home"></i> 首页</a>
+                <a href="shopping.html"><i class="fas fa-shopping-cart"></i> 购物</a>
+                <a href="design-tool.html"><i class="fas fa-ruler-combined"></i> 设计工具</a>
+                <a href="recommendations.html"><i class="fas fa-lightbulb"></i> 方案推荐</a>
+                <a href="community.html"><i class="fas fa-users"></i> 社区支持</a>
+                <a href="consultation.html" class="active"><i class="fas fa-comments"></i> 在线咨询</a>
+                <div class="nav-dropdown">
+                    <a href="#"><i class="fas fa-user"></i> 个人账户 <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        <a href="account.html"><i class="fas fa-user-circle"></i> 我的账户</a>
+                        <a href="account.html#history"><i class="fas fa-history"></i> 浏览历史</a>
+                        <a href="account.html#favorites"><i class="fas fa-heart"></i> 我的收藏</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> 退出登录</a>
+                    </div>
+                </div>
+                <a href="feedback.html" class="btn-feedback"><i class="fas fa-comment-dots"></i> 反馈</a>
+            </div>
+            <div class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 移动端菜单 -->
+    <div class="mobile-nav">
+        <a href="index.html"><i class="fas fa-home"></i> 首页</a>
+        <a href="shopping.html"><i class="fas fa-shopping-cart"></i> 购物</a>
+        <a href="design-tool.html"><i class="fas fa-ruler-combined"></i> 设计工具</a>
+        <a href="recommendations.html"><i class="fas fa-lightbulb"></i> 方案推荐</a>
+        <a href="community.html"><i class="fas fa-users"></i> 社区支持</a>
+        <a href="consultation.html"><i class="fas fa-comments"></i> 在线咨询</a>
+        <a href="account.html"><i class="fas fa-user"></i> 个人账户</a>
+        <a href="feedback.html"><i class="fas fa-comment-dots"></i> 用户反馈</a>
+    </div>
+
+    <!-- 预约咨询模态框 -->
+    <div class="booking-modal" id="bookingModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>预约设计咨询</h2>
+                <button class="close-modal" onclick="closeBookingModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="bookingForm">
+                    <div class="form-group">
+                        <label for="consultantName">咨询设计师</label>
+                        <input type="text" id="consultantName" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="consultationDate">预约日期</label>
+                        <input type="date" id="consultationDate" required min="<?php echo date('Y-m-d'); ?>">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>选择时间</label>
+                        <div class="time-slots" id="timeSlots">
+                            <!-- 时间槽动态生成 -->
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="consultationType">咨询类型</label>
+                        <select id="consultationType" required>
+                            <option value="">请选择类型</option>
+                            <option value="initial">初次咨询</option>
+                            <option value="followup">后续跟进</option>
+                            <option value="emergency">紧急咨询</option>
+                            <option value="project">项目咨询</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="consultationDuration">咨询时长</label>
+                        <select id="consultationDuration" required>
+                            <option value="30">30分钟</option>
+                            <option value="60" selected>60分钟</option>
+                            <option value="90">90分钟</option>
+                            <option value="120">120分钟</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="consultationTopic">咨询主题</label>
+                        <input type="text" id="consultationTopic" placeholder="例如：小户型空间优化" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="consultationNotes">补充说明</label>
+                        <textarea id="consultationNotes" rows="4" placeholder="请详细描述您的需求和问题..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>咨询费用</label>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--accent-color);" id="consultationFee">￥299</div>
+                        <p style="font-size: 14px; color: var(--gray-color); margin-top: 5px;">费用将在预约成功后支付</p>
+                    </div>
+                    
+                    <div class="form-group" style="display: flex; gap: 10px;">
+                        <button type="submit" class="btn-primary" style="flex: 1;">确认预约</button>
+                        <button type="button" class="btn-secondary" onclick="closeBookingModal()" style="flex: 1;">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <main>
+        <!-- 在线咨询头部 -->
+        <section class="consultation-header">
+            <div class="container">
+                <h1>专业在线咨询</h1>
+                <p>与资深设计师一对一交流，获取专业的空间美学建议</p>
+            </div>
+        </section>
+
+        <!-- 咨询类型 -->
+        <section class="consultation-types">
+            <div class="container">
+                <h2 style="text-align: center; font-size: 36px; margin-bottom: 50px; color: var(--dark-color); font-family: 'Playfair Display', serif;">
+                    选择咨询类型
+                </h2>
+                
+                <div class="types-grid">
+                    <div class="type-card">
+                        <div class="type-icon">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <h3>整体规划咨询</h3>
+                        <p>针对整个房屋的布局和风格规划，提供全面的设计方案和建议。</p>
+                        <div class="type-price">￥499/次</div>
+                        <button class="btn-primary" onclick="selectConsultationType('整体规划')">选择此类型</button>
+                    </div>
+                    
+                    <div class="type-card">
+                        <div class="type-icon">
+                            <i class="fas fa-paint-roller"></i>
+                        </div>
+                        <h3>风格设计咨询</h3>
+                        <p>专注于特定风格的设计方案，包括色彩搭配、家具选择和软装布置。</p>
+                        <div class="type-price">￥299/次</div>
+                        <button class="btn-primary" onclick="selectConsultationType('风格设计')">选择此类型</button>
+                    </div>
+                    
+                    <div class="type-card">
+                        <div class="type-icon">
+                            <i class="fas fa-ruler-combined"></i>
+                        </div>
+                        <h3>空间优化咨询</h3>
+                        <p>针对小户型或特殊空间的优化方案，最大化空间利用率。</p>
+                        <div class="type-price">￥399/次</div>
+                        <button class="btn-primary" onclick="selectConsultationType('空间优化')">选择此类型</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 设计师列表 -->
+        <section class="designer-section">
+            <div class="container">
+                <div class="designer-filters">
+                    <h2 style="font-size: 36px; color: var(--dark-color); font-family: 'Playfair Display', serif;">
+                        专业设计师团队
+                    </h2>
+                    
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        <select id="designerFilter" style="padding: 8px 15px; border: 1px solid var(--light-gray); border-radius: var(--border-radius);">
+                            <option value="all">全部设计师</option>
+                            <option value="online">在线设计师</option>
+                            <option value="senior">资深设计师</option>
+                            <option value="specialty">按专长筛选</option>
+                        </select>
+                        <input type="text" placeholder="搜索设计师..." style="padding: 8px 15px; border: 1px solid var(--light-gray); border-radius: var(--border-radius);">
+                    </div>
+                </div>
+                
+                <div class="designer-grid" id="designerGrid">
+                    <!-- 设计师卡片动态加载 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 在线聊天 -->
+        <section class="chat-section">
+            <div class="container">
+                <h2 style="text-align: center; font-size: 36px; margin-bottom: 50px; color: var(--dark-color); font-family: 'Playfair Display', serif;">
+                    在线即时咨询
+                </h2>
+                
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div class="chat-partner">
+                            <div class="partner-avatar">王</div>
+                            <div class="partner-info">
+                                <h3>王设计师</h3>
+                                <span class="chat-status">在线 ? 正在输入...</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn-secondary" style="background: rgba(255, 255, 255, 0.2);">
+                                <i class="fas fa-phone"></i>
+                            </button>
+                            <button class="btn-secondary" style="background: rgba(255, 255, 255, 0.2);">
+                                <i class="fas fa-video"></i>
+                            </button>
+                            <button class="btn-secondary" style="background: rgba(255, 255, 255, 0.2);">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message received">
+                            <p>您好！我是王设计师。很高兴为您提供空间美学咨询服务。</p>
+                            <div class="message-time">10:30 AM</div>
+                        </div>
+                        
+                        <div class="message sent">
+                            <p>您好！我最近在装修一个小户型的公寓，想咨询一下空间优化的问题。</p>
+                            <div class="message-time">10:32 AM</div>
+                        </div>
+                        
+                        <div class="message received">
+                            <p>好的，小户型空间优化是我的专长。您可以先告诉我具体的房间尺寸和您的需求吗？</p>
+                            <div class="message-time">10:33 AM</div>
+                        </div>
+                        
+                        <div class="message sent">
+                            <p>公寓面积是65平米，两室一厅。我希望客厅能兼具工作和休闲功能。</p>
+                            <div class="message-time">10:35 AM</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input">
+                        <input type="text" id="messageInput" placeholder="输入消息...">
+                        <button class="send-btn" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 常见问题 -->
+        <section class="faq-section">
+            <div class="container">
+                <h2 style="text-align: center; font-size: 36px; margin-bottom: 50px; color: var(--dark-color); font-family: 'Playfair Display', serif;">
+                    常见问题解答
+                </h2>
+                
+                <div class="faq-container">
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>咨询费用如何计算？</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>咨询费用根据咨询类型和时长计算。基础咨询（30分钟）起价为￥199，专业深度咨询（60-120分钟）价格在￥299-￥599之间。预约成功后可在个人账户查看详细费用。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>如何预约设计师？</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>您可以通过以下方式预约：1. 在设计师页面点击"预约咨询"按钮；2. 选择咨询时间和类型；3. 填写咨询需求；4. 完成支付确认预约。预约成功后设计师会与您联系确认细节。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>咨询前需要准备什么？</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>建议准备：1. 房屋平面图（如有）；2. 房间尺寸信息；3. 您的预算范围；4. 喜欢的风格参考图片；5. 具体问题和需求清单。这些信息能帮助设计师更好地理解您的需求。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>可以取消或改期预约吗？</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>可以。如需取消或改期，请在预约时间前24小时联系客服或设计师。24小时内取消可能会产生部分费用。您可以在个人账户的"我的预约"中管理所有预约。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>咨询后能获得什么？</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>咨询结束后您将获得：1. 专业的设计建议报告；2. 参考方案和效果图；3. 购物清单和预算规划；4. 后续跟进支持。所有资料将通过邮箱和个人账户发送给您。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3><i class="fas fa-home"></i> 栖序空间生活美学</h3>
+                    <p>为您提供一站式空间美学、购物与布局服务。打造梦想家居，从我们开始。</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-weixin"></i></a>
+                        <a href="#"><i class="fab fa-weibo"></i></a>
+                        <a href="#"><i class="fab fa-qq"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>快速链接</h4>
+                    <ul>
+                        <li><a href="index.html">首页</a></li>
+                        <li><a href="shopping.html">购物商城</a></li>
+                        <li><a href="design-tool.html">设计工具</a></li>
+                        <li><a href="community.html">社区支持</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>服务支持</h4>
+                    <ul>
+                        <li><a href="consultation.html">在线咨询</a></li>
+                        <li><a href="recommendations.html">方案推荐</a></li>
+                        <li><a href="feedback.html">用户反馈</a></li>
+                        <li><a href="#">帮助中心</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>联系我们</h4>
+                    <ul class="contact-info">
+                        <li><i class="fas fa-phone"></i> 400-123-4567</li>
+                        <li><i class="fas fa-envelope"></i> support@homedesign.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> 北京市朝阳区设计大厦A座</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 栖序空间生活美学. 保留所有权利. | <a href="#">隐私政策</a> | <a href="#">使用条款</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="./src/scripts/main.js"></script>
+    <script src="./src/scripts/consultation.js"></script>
+</body>
+</html>
+
