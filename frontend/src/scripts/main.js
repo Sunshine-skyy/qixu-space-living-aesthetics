@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApplication();
     setupMobileMenu();
     setupImageSlider();
+    setupParallaxHero();
+    setupPageParallax();
     setupEventListeners();
     initializePageSpecificFeatures();
     checkLoginStatus();
@@ -179,15 +181,47 @@ function setupEventListeners() {
 
 // 设置下拉菜单
 function setupDropdownMenus() {
-    document.querySelectorAll('.nav-dropdown').forEach(dropdown => {
+    const dropdowns = document.querySelectorAll('.nav-dropdown');
+    dropdowns.forEach(dropdown => {
+        if (dropdown.dataset.dropdownReady === '1') return;
+        dropdown.dataset.dropdownReady = '1';
+        const trigger = Array.from(dropdown.children).find(child => child.tagName === 'A');
+        const content = Array.from(dropdown.children).find(child => child.classList?.contains('dropdown-content'));
+        if (!trigger || !content) return;
+
+        trigger.setAttribute('aria-haspopup', 'true');
+        trigger.setAttribute('aria-expanded', 'false');
+
         dropdown.addEventListener('mouseenter', function() {
-            this.querySelector('.dropdown-content').style.display = 'block';
+            dropdown.classList.add('is-hovered');
         });
         
         dropdown.addEventListener('mouseleave', function() {
-            this.querySelector('.dropdown-content').style.display = 'none';
+            dropdown.classList.remove('is-hovered', 'is-hover-suppressed');
+        });
+
+        trigger.addEventListener('click', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const wasOpen = dropdown.classList.contains('is-open');
+            const isOpen = !wasOpen;
+            dropdown.classList.toggle('is-open', isOpen);
+            dropdown.classList.toggle('is-hover-suppressed', wasOpen);
+            trigger.setAttribute('aria-expanded', String(isOpen));
         });
     });
+
+    if (document.documentElement.dataset.dropdownDocumentReady !== '1') {
+        document.documentElement.dataset.dropdownDocumentReady = '1';
+        document.addEventListener('click', function(event) {
+        document.querySelectorAll('.nav-dropdown.is-open').forEach(dropdown => {
+            if (dropdown.contains(event.target)) return;
+            dropdown.classList.remove('is-open', 'is-hover-suppressed');
+            const trigger = Array.from(dropdown.children).find(child => child.tagName === 'A');
+            trigger?.setAttribute('aria-expanded', 'false');
+        });
+        });
+    }
     
     // 移动端下拉菜单
     document.querySelectorAll('.mobile-nav .nav-dropdown').forEach(dropdown => {
@@ -409,8 +443,63 @@ function closeAllModals() {
     });
     
     document.querySelectorAll('.dropdown-content').forEach(dropdown => {
-        dropdown.style.display = 'none';
+        dropdown.closest('.nav-dropdown')?.classList.remove('is-open');
+        dropdown.closest('.nav-dropdown')?.classList.remove('is-hovered');
+        dropdown.closest('.nav-dropdown')?.classList.remove('is-hover-suppressed');
+        const owner = dropdown.closest('.nav-dropdown');
+        const trigger = owner && Array.from(owner.children).find(child => child.tagName === 'A');
+        trigger?.setAttribute('aria-expanded', 'false');
     });
+}
+
+// Foreground copy travels faster than the shared page background.
+function setupParallaxHero() {
+    const hero = document.querySelector('[data-parallax-hero]');
+    if (!hero || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    let ticking = false;
+    const update = () => {
+        const rect = hero.getBoundingClientRect();
+        const visibleTravel = Math.min(Math.max(-rect.top, 0), rect.height);
+        const ratio = Math.min(visibleTravel / rect.height, 1);
+
+        hero.style.setProperty('--parallax-foreground-y', `${-visibleTravel * 0.24}px`);
+        hero.style.setProperty('--parallax-image-y', `${-visibleTravel * 0.1}px`);
+        hero.style.setProperty('--parallax-foreground-opacity', String(1 - ratio * 0.42));
+        ticking = false;
+    };
+
+    const requestUpdate = () => {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
+}
+
+function setupPageParallax() {
+    const page = document.querySelector('[data-parallax-page]');
+    if (!page || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    let ticking = false;
+    const update = () => {
+        // Keep enough overscan around the fixed image so long pages never reveal an empty edge.
+        const maxOffset = Math.max(window.innerHeight * 0.42, 180);
+        const offset = Math.min(Math.max(window.scrollY, 0) * 0.12, maxOffset);
+        page.style.setProperty('--page-parallax-y', `${offset}px`);
+        ticking = false;
+    };
+    const requestUpdate = () => {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
 }
 
 // 关闭移动端菜单
@@ -1168,6 +1257,22 @@ function updatePageTitle() {
     const title = pageTitles[appState.currentPage] || '栖序空间生活美学';
     document.title = title;
 }
+
+// Keep the desktop account menu usable even if another page-specific initializer fails.
+// This listener is intentionally delegated so every page with the shared navigation gets the same behavior.
+document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('click', function(event) {
+        const trigger = event.target.closest('.nav-dropdown > a');
+        if (!trigger || trigger.closest('.mobile-nav')) return;
+        const dropdown = trigger.parentElement;
+        if (dropdown.dataset.dropdownReady === '1') return;
+        event.preventDefault();
+        const isOpen = !dropdown.classList.contains('is-open');
+        dropdown.classList.toggle('is-open', isOpen);
+        dropdown.classList.toggle('is-hover-suppressed', !isOpen);
+        trigger.setAttribute('aria-expanded', String(isOpen));
+    }, true);
+});
 
 // 显示通知
 function showNotification(message, type = 'info') {
