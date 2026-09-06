@@ -251,7 +251,9 @@ function updateSummary() {
     
     // 更新评分
     const rating = feedbackState.formData.rating;
-    document.getElementById('summaryRating').textContent = rating ? '★'.repeat(rating) + '☆'.repeat(5 - rating) : '未选择';
+    document.getElementById('summaryRating').innerHTML = rating
+        ? Array.from({ length: 5 }, (_, index) => window.svgIcon(index < rating ? 'star' : 'starOutline')).join('')
+        : '未选择';
     
     // 更新标题
     document.getElementById('summaryTitle').textContent = feedbackState.formData.title || '未填写';
@@ -271,6 +273,7 @@ function updateSummary() {
 
 // 提交反馈
 function submitFeedback(event) {
+    if (typeof window.requireAuthentication === 'function' && !window.requireAuthentication()) return;
     event.preventDefault();
     
     // 验证最终同意
@@ -426,7 +429,7 @@ function handleScreenshotUpload(event) {
             imgElement.className = 'screenshot-item';
             imgElement.innerHTML = `
                 <img src="${e.target.result}" alt="截图预览">
-                <button class="remove-screenshot" onclick="this.parentElement.remove()">×</button>
+                <button class="remove-screenshot" onclick="this.parentElement.remove()" aria-label="移除"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"/></svg></button>
             `;
             preview.appendChild(imgElement);
         };
@@ -531,7 +534,7 @@ function createFeedbackElement(feedback) {
     const status = statusMap[feedback.status] || statusMap.pending;
     
     // 生成评级星星
-    const ratingStars = '★'.repeat(feedback.rating || 0) + '☆'.repeat(5 - (feedback.rating || 0));
+    const ratingStars = Array.from({ length: 5 }, (_, index) => window.svgIcon(index < (feedback.rating || 0) ? 'star' : 'starOutline')).join('');
     
     // 生成响应HTML
     let responseHTML = '';

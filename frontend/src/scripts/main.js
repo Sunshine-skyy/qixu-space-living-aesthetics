@@ -4,7 +4,10 @@ document.addEventListener('DOMContentLoaded', function() {
     setupMobileMenu();
     setupImageSlider();
     setupParallaxHero();
+    setupHeroTitleRotator();
     setupPageParallax();
+    setupSectionParallax();
+    setupAuthenticationNavigation();
     setupEventListeners();
     initializePageSpecificFeatures();
     checkLoginStatus();
@@ -19,6 +22,19 @@ let appState = {
     notifications: [],
     currentPage: ''
 };
+
+// 无 emoji 的轻量 SVG 图标，供动态内容复用。
+function svgIcon(name, className = 'icon-svg', label = '') {
+    const paths = {
+        close: '<path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"/>',
+        star: '<path d="m12 3 2.78 5.63 6.22.9-4.5 4.39 1.06 6.2L12 19.2l-5.56 2.92 1.06-6.2L3 9.53l6.22-.9L12 3Z"/>',
+        starOutline: '<path d="m12 3 2.78 5.63 6.22.9-4.5 4.39 1.06 6.2L12 19.2l-5.56 2.92 1.06-6.2L3 9.53l6.22-.9L12 3Z" fill="none" stroke="currentColor" stroke-width="1.6"/>',
+        check: '<path d="m5 12 4 4L19 6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>'
+    };
+    return `<svg class="${className}" viewBox="0 0 24 24" aria-hidden="${label ? 'false' : 'true'}"${label ? ` aria-label="${label}"` : ''}>${paths[name] || paths.check}</svg>`;
+}
+
+window.svgIcon = svgIcon;
 
 // 初始化应用
 function initializeApplication() {
@@ -403,11 +419,12 @@ function setupPageAnimations() {
             animation: fadeInUp 0.6s ease forwards;
         }
         
+        /* 动态加载的首页商品不一定会被初始观察器捕获，默认保持可见。 */
         .feature-card,
         .product-card,
         .post-card,
         .designer-card {
-            opacity: 0;
+            opacity: 1;
         }
     `;
     document.head.appendChild(style);
@@ -497,6 +514,91 @@ function setupPageParallax() {
         ticking = true;
         window.requestAnimationFrame(update);
     };
+    update();
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
+}
+
+// Rotate the four-character feature promise in the hero title.
+function setupHeroTitleRotator() {
+    const rotator = document.querySelector('.hero-title-rotator');
+    const words = rotator ? Array.from(rotator.querySelectorAll('.hero-title-word')) : [];
+    if (words.length < 2) return;
+
+    let current = words.findIndex(word => word.classList.contains('is-active'));
+    if (current < 0) current = 0;
+    let timer;
+
+    const showNext = () => {
+        const previous = words[current];
+        const nextIndex = (current + 1) % words.length;
+        const next = words[nextIndex];
+        previous.classList.remove('is-active');
+        previous.classList.add('is-leaving');
+        next.classList.add('is-active');
+        current = nextIndex;
+        window.setTimeout(() => previous.classList.remove('is-leaving'), 650);
+    };
+
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        timer = window.setInterval(showNext, 2800);
+        window.addEventListener('pagehide', () => window.clearInterval(timer), { once: true });
+    }
+}
+
+// 仅使用 localStorage 控制前端导航显示，不涉及后端认证逻辑。
+function setupAuthenticationNavigation() {
+    let isLoggedIn = false;
+    try {
+        isLoggedIn = Boolean(JSON.parse(localStorage.getItem('user') || 'null'));
+    } catch (error) {
+        localStorage.removeItem('user');
+    }
+
+    document.querySelectorAll('.nav-dropdown').forEach(dropdown => {
+        if (isLoggedIn) return;
+        const authActions = document.createElement('div');
+        authActions.className = 'nav-auth-actions';
+        authActions.innerHTML = `
+            <a class="nav-auth-link" href="account.html?auth=login"><i class="fas fa-user"></i> 登录/注册</a>
+        `;
+        dropdown.replaceWith(authActions);
+    });
+
+    const mobileNav = document.querySelector('.mobile-nav');
+    if (!mobileNav || mobileNav.querySelector('.mobile-auth-actions')) return;
+
+    if (!isLoggedIn) {
+        mobileNav.querySelectorAll('a[href="account.html"]').forEach(link => link.remove());
+        const mobileActions = document.createElement('div');
+        mobileActions.className = 'mobile-auth-actions';
+        mobileActions.innerHTML = `
+            <a href="account.html?auth=login"><i class="fas fa-user"></i> 登录/注册</a>
+        `;
+        mobileNav.appendChild(mobileActions);
+    }
+}
+
+// Shared headers retain their layout while the common background image moves more slowly.
+function setupSectionParallax() {
+    const sections = document.querySelectorAll('[data-parallax-section]');
+    if (!sections.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    let ticking = false;
+    const update = () => {
+        sections.forEach(section => {
+            const offset = Math.max(Math.min(-section.getBoundingClientRect().top * 0.14, 140), -140);
+            section.style.setProperty('--section-parallax-y', `${offset}px`);
+        });
+        ticking = false;
+    };
+
+    const requestUpdate = () => {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(update);
+    };
+
     update();
     window.addEventListener('scroll', requestUpdate, { passive: true });
     window.addEventListener('resize', requestUpdate);
@@ -857,6 +959,32 @@ function checkLoginStatus() {
     }
 }
 
+// 需要账户的操作统一使用此守卫。
+function requireAuthentication(message = '请先登录后再使用此功能') {
+    let user = null;
+    try {
+        user = JSON.parse(localStorage.getItem('user') || 'null');
+    } catch (error) {
+        localStorage.removeItem('user');
+    }
+
+    if (user) return true;
+
+    showNotification(message, 'warning');
+    setTimeout(() => {
+        if (!window.location.pathname.endsWith('account.html')) {
+            window.location.href = 'account.html?auth=login';
+        } else if (typeof window.showAuthModal === 'function') {
+            window.showAuthModal('login');
+        } else {
+            window.location.hash = 'login';
+        }
+    }, 350);
+    return false;
+}
+
+window.requireAuthentication = requireAuthentication;
+
 // 加载热门商品
 function loadHotProducts() {
     const productsGrid = document.querySelector('.products-grid');
@@ -870,7 +998,7 @@ function loadHotProducts() {
             price: '¥3,999',
             originalPrice: '¥4,999',
             rating: 4.5,
-            image: 'sofa',
+            image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=85',
             tags: ['热销', '新品']
         },
         {
@@ -879,7 +1007,7 @@ function loadHotProducts() {
             price: '¥2,599',
             originalPrice: '¥2,999',
             rating: 4.8,
-            image: 'table',
+            image: 'https://images.unsplash.com/photo-1594026112284-02bb6f3352fe?auto=format&fit=crop&w=800&q=85',
             tags: ['热销']
         },
         {
@@ -888,7 +1016,7 @@ function loadHotProducts() {
             price: '¥899',
             originalPrice: '¥1,199',
             rating: 4.3,
-            image: 'briefcase',
+            image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=85',
             tags: ['新品', '智能']
         },
         {
@@ -897,7 +1025,7 @@ function loadHotProducts() {
             price: '¥1,599',
             originalPrice: '¥1,999',
             rating: 4.7,
-            image: 'chair',
+            image: 'https://images.unsplash.com/photo-1505843490701-5be5d7f7f4d6?auto=format&fit=crop&w=800&q=85',
             tags: ['热销', '舒适']
         }
     ];
@@ -922,8 +1050,7 @@ function loadHotProducts() {
         const stars = generateStars(product.rating);
         
         productCard.innerHTML = `
-            <div class="product-img">
-                <i class="fas fa-${product.image}"></i>
+            <div class="product-img" style="background-image: url('${product.image}'); background-size: cover; background-position: center;">
             </div>
             <div class="product-info">
                 <h3 class="product-title">${product.name}</h3>
@@ -969,6 +1096,7 @@ function generateStars(rating) {
 
 // 添加到购物车
 function addToCart(productId) {
+    if (!requireAuthentication()) return;
     // 模拟添加到购物车
     const existingItem = appState.cart.find(item => item.id === productId);
     
@@ -995,6 +1123,7 @@ function addToCart(productId) {
 
 // 添加到收藏
 function addToFavorites(productId) {
+    if (!requireAuthentication()) return;
     let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
     
     if (!favorites.includes(productId)) {
@@ -1040,7 +1169,7 @@ function showNotificationsPanel() {
         <div class="notifications-panel">
             <div class="panel-header">
                 <h3>通知</h3>
-                <button class="close-panel">×</button>
+                <button class="close-panel" aria-label="关闭"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"/></svg></button>
             </div>
             <div class="panel-content">
                 <div class="notification-item unread">

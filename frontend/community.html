@@ -111,32 +111,6 @@
             color: var(--gray-color);
         }
         
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .stat-card {
-            background: var(--light-color);
-            padding: 15px;
-            border-radius: var(--border-radius);
-            text-align: center;
-        }
-        
-        .stat-number {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--primary-color);
-            display: block;
-        }
-        
-        .stat-label {
-            font-size: 12px;
-            color: var(--gray-color);
-        }
-        
         .create-post-btn {
             width: 100%;
             margin-bottom: 25px;
@@ -510,7 +484,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>发布新话题</h2>
-                <button class="close-modal" onclick="closePostModal()">×</button>
+                <button class="close-modal" onclick="closePostModal()" aria-label="关闭"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"/></svg></button>
             </div>
             <div class="modal-body">
                 <form id="postForm">
@@ -563,7 +537,7 @@
     <!-- 主内容区 -->
     <main>
         <!-- 社区头部 -->
-        <section class="community-header">
+        <section class="community-header" data-parallax-section>
             <div class="container">
                 <h1>空间美学社区</h1>
                 <p>与全球家居爱好者分享经验，获取设计灵感，解决问题</p>
@@ -577,21 +551,6 @@
             <div class="community-layout">
                 <!-- 左侧侧边栏 -->
                 <div class="community-sidebar">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <span class="stat-number" id="totalPosts">1,284</span>
-                            <span class="stat-label">总话题数</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-number" id="totalUsers">5,673</span>
-                            <span class="stat-label">社区用户</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-number" id="onlineUsers">243</span>
-                            <span class="stat-label">在线用户</span>
-                        </div>
-                    </div>
-                    
                     <div class="sidebar-section">
                         <h3><i class="fas fa-fire"></i> 热门话题</h3>
                         <div class="topic-tags">
