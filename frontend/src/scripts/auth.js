@@ -142,7 +142,7 @@ function updateAuthenticationNavigation() {
             const authActions = document.createElement('div');
             authActions.className = 'nav-auth-actions';
             authActions.innerHTML = `
-                <a class="nav-auth-link" href="account.html?auth=login"><i class="fas fa-user"></i> 登录/注册</a>
+                <a class="nav-auth-link" href="index.html?auth=login"><i class="fas fa-user"></i> 登录/注册</a>
             `;
             dropdown.replaceWith(authActions);
         }
@@ -157,7 +157,7 @@ function updateAuthenticationNavigation() {
         const mobileActions = document.createElement('div');
         mobileActions.className = 'mobile-auth-actions';
         mobileActions.innerHTML = `
-            <a href="account.html?auth=login"><i class="fas fa-user"></i> 登录/注册</a>
+            <a href="index.html?auth=login"><i class="fas fa-user"></i> 登录/注册</a>
         `;
         mobileNav.appendChild(mobileActions);
     }
